@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>[Working Title] — Astrology Notes / 28 Cylinders</title>
+<meta name="description" content="A growing archive of astrology think pieces — Venus signs, birth charts, transits, and everything else. From the founder of 28 Cylinders.">
+<meta name="robots" content="index, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500&family=Short+Stack&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.transit-section{max-width:1100px;margin:0 auto;padding:56px 32px 8px}
+.transit-inner{text-align:center}
+/* styled like the [Working Title] wordmark (nav-logo/hero-title): serif,
+   with an italic emphasis on part of the phrase — same visual family,
+   scaled for a section header rather than the full hero. */
+.transit-title{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(28px,4vw,40px);line-height:1;color:var(--white);margin-bottom:16px}
+.transit-title em{font-style:italic;font-weight:400}
+.transit-sub{font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;opacity:.75;margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto}
+.transit-rising-row{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.btn-transit-rising{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:11px 22px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:var(--white);border-radius:999px;cursor:pointer;transition:background .2s}
+.btn-transit-rising:hover{background:rgba(255,255,255,.1)}
+.btn-transit-rising:disabled{opacity:.4;cursor:not-allowed}
+.transit-rising-note{font-family:'Space Mono',monospace;font-size:11px;line-height:1.6;opacity:.5;max-width:440px}
+.retro-mark{font-size:18px;color:var(--ink-3);cursor:help}
+@media(max-width:600px){ .transit-section{padding:40px 24px 4px} }
+</style>
+</head>
+<body class="page-offset">
+
+<!-- NAV -->
+<nav id="nav" role="navigation" aria-label="Main navigation">
+  <a class="nav-logo" href="index.html">[Working Title]<span aria-hidden="true">.</span></a>
+  <ul class="nav-links" role="list">
+    <li><a href="index.html">The Archive</a></li>
+    <li><a href="chart.html">Read My Chart</a></li>
+    <li><a href="https://28cylinders.com" target="_blank" rel="noopener">28 Cylinders ↗</a></li>
+    <li><a href="mailto:hi@28cylinders.com">Contact</a></li>
+  </ul>
+  <button class="nav-hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-drawer" id="drawer" role="dialog" aria-label="Mobile menu">
+  <a href="index.html">The Archive</a>
+  <a href="chart.html">Read My Chart</a>
+  <a href="https://28cylinders.com">28 Cylinders</a>
+  <a href="mailto:hi@28cylinders.com">Contact</a>
+</div>
+
+<!-- HERO / COLLAGE (placeholder scraps — swap for real photographed ephemera) -->
+<section class="hero" aria-label="Intro">
+  <!-- scattered placeholder elements, positioned loosely like a real desk/corkboard -->
+  <div class="scrap" style="width:140px;height:96px;top:14%;left:8%;transform:rotate(-8deg)">[polaroid: my chart]</div>
+  <div class="scrap" style="width:100px;height:130px;top:58%;left:12%;transform:rotate(6deg)">[tarot card]</div>
+  <div class="scrap" style="width:120px;height:80px;top:20%;right:9%;transform:rotate(9deg)">[ticket stub]</div>
+  <div class="scrap" style="width:90px;height:90px;border-radius:50%;bottom:12%;right:14%;transform:rotate(-4deg)">[crystal photo]</div>
+  <div class="scrap" style="width:110px;height:70px;bottom:8%;left:32%;transform:rotate(3deg)">[dried flower]</div>
+  <div class="scrap-label" style="top:10%;left:40%;transform:rotate(-3deg)">est. 2026</div>
+  <div class="scrap-label" style="bottom:16%;right:30%;transform:rotate(4deg)">venus in libra</div>
+
+  <div class="hero-title-wrap">
+    <div>
+      <h1 class="hero-title">[Working<br><em>Title</em>]</h1>
+      <p class="hero-sub">An ever-growing astrology archive</p>
+    </div>
+  </div>
+</section>
+
+<!-- RIGHT NOW (current transits — no birth data needed, just today) -->
+<section class="transit-section" aria-label="Current planetary transits">
+  <div class="transit-inner">
+    <h2 class="transit-title">Current <em>Transits</em></h2>
+    <p class="transit-sub" id="transitSub">Loading today's sky…</p>
+    <div class="highlight-grid" id="transitGrid"></div>
+    <div class="transit-rising-row">
+      <button type="button" class="btn-transit-rising" id="transitRisingBtn">See your Rising sign too</button>
+      <p class="transit-rising-note" id="transitRisingNote">Sun, Moon, and planet signs only need today's date — Rising needs your location too, and only your browser sees it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FILTERS (auto-generated from posts.js categories) -->
+<div class="filters" id="filters" role="tablist" aria-label="Filter by category"></div>
+
+<!-- ARCHIVE GRID (auto-generated from posts.js) -->
+<section class="archive">
+  <div class="archive-grid" id="archiveGrid"></div>
+  <p class="empty-state" id="emptyState" style="display:none">Nothing here yet in this category — check back soon.</p>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 28 Cylinders</span>
+    <a href="https://28cylinders.com" target="_blank" rel="noopener">28cylinders.com</a>
+  </div>
+</footer>
+
+<script src="colors.js"></script>
+<script src="content.js"></script>
+<script src="vendor/circular-natal-horoscope.bundle.js"></script>
+<script src="posts.js"></script>
+<script>
+// ── NAV ──
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('solid', window.scrollY > 10), { passive:true });
+
+const hamburger = document.getElementById('hamburger');
+const drawer = document.getElementById('drawer');
+hamburger.addEventListener('click', () => {
+  const open = drawer.classList.toggle('open');
+  hamburger.setAttribute('aria-expanded', open);
+});
+drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  drawer.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', false);
+}));
+
+// ── RENDER FILTERS + GRID FROM posts.js ──
+const grid = document.getElementById('archiveGrid');
+const filtersEl = document.getElementById('filters');
+const emptyState = document.getElementById('emptyState');
+let activeCategory = 'All';
+
+function formatDate(iso){
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month:'short', day:'2-digit', year:'numeric' }).toUpperCase();
+}
+
+function renderFilters(){
+  const cats = ['All', ...new Set(POSTS.map(p => p.category))];
+  filtersEl.innerHTML = cats.map(c =>
+    `<button class="filter-pill${c===activeCategory?' active':''}" data-cat="${c}">${c}</button>`
+  ).join('');
+  filtersEl.querySelectorAll('.filter-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.dataset.cat;
+      renderFilters();
+      renderGrid();
+    });
+  });
+}
+
+function renderGrid(){
+  const posts = activeCategory === 'All' ? POSTS : POSTS.filter(p => p.category === activeCategory);
+  grid.innerHTML = posts.map((p, i) => {
+    const key = ASTRO_COLORS.CATEGORY_COLORS[p.category] || 'purple';
+    const sw = ASTRO_COLORS.swatch(key);
+    // staggered per-row cascade as each row scrolls into view, not just a flat fade
+    const delay = (i % 3) * 0.09;
+    return `
+    <a class="card reveal${p.published === false ? ' card-coming-soon' : ''}" href="post.html?id=${p.id}" style="transition-delay:${delay}s">
+      ${p.published === false ? '<span class="coming-soon-tag">Coming Soon</span>' : ''}
+      <span class="card-tag" style="background:${sw.cssVar};color:${sw.text}">${p.category}</span>
+      <div class="card-title">${p.title}</div>
+      <p class="card-excerpt">${p.excerpt}</p>
+      <div class="card-stub"><span>${formatDate(p.date)}</span><span>${p.published === false ? 'Coming soon' : 'Read →'}</span></div>
+    </a>
+  `;
+  }).join('');
+  emptyState.style.display = posts.length ? 'none' : 'block';
+  observeReveals();
+}
+
+// ── SCROLL REVEAL (respects prefers-reduced-motion) — defined before the
+// first renderGrid() call below, since renderGrid() calls observeReveals()
+// immediately. ──
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const revealObserver = prefersReducedMotion ? null : new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){ e.target.classList.add('visible'); revealObserver.unobserve(e.target); }
+  });
+}, { threshold: 0.1 });
+function observeReveals(){
+  if(prefersReducedMotion){
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    return;
+  }
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el => revealObserver.observe(el));
+}
+
+renderFilters();
+renderGrid();
+</script>
+<script src="transit.js"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#000;--white:#fff;
+  /* the 28cylinders.com brand palette, kept as-is... */
+  --mint:#5EEAD4;--sky:#7DD3FC;--lavender:#A78BFA;
+  --teal:#0D9488;--cobalt:#1D4ED8;--purple:#5B21B6;
+  --pink:#F43F5E;--orange:#F97316;--yellow:#FDE047;
+  /* ...expanded with bright complementary hues, for the extra colors this
+     site needs (10 planets + 12 houses + categories) that the brand's
+     original 9-color services grid never had to cover. Same energy —
+     saturated, eclectic, fun — not muted or antique. */
+  --coral:#FF6B6B;    /* complements mint/teal */
+  --amber:#FBBF24;    /* complements cobalt/purple */
+  --fuchsia:#EC4899;  /* complements yellow/lime */
+  --lime:#A3E635;     /* complements purple/lavender */
+  --violet:#8B5CF6;   /* sits between lavender and purple */
+  --nav-h:60px;
+  /* ink tokens for text on WHITE cards — solid colors, not opacity fades,
+     so contrast is fixed and predictable (all verified ≥4.5:1 on white,
+     per WCAG AA for normal text). Shared by every page with white cards. */
+  --ink-1:#1a1a1a; --ink-2:#454545; --ink-3:#666;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Space Mono',monospace;background:var(--black);color:var(--white);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+.serif{font-family:'Playfair Display',serif}
+.hand{font-family:'Short Stack',cursive}
+
+/* ── NAV (same mechanics as main site, relabeled) ── */
+nav{
+  position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:500;
+  display:flex;align-items:center;justify-content:space-between;padding:0 40px;
+  background:rgba(0,0,0,0);border-bottom:1px solid transparent;
+  transition:background .3s,border-color .3s;
+}
+nav.solid{background:rgba(0,0,0,.96);backdrop-filter:blur(16px);border-bottom-color:rgba(255,255,255,.08)}
+.nav-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:18px;color:var(--white);text-decoration:none;letter-spacing:.01em}
+.nav-links{display:flex;gap:26px;list-style:none;align-items:center}
+.nav-links a{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--white);text-decoration:none;opacity:.55;transition:opacity .2s}
+.nav-links a:hover{opacity:1}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+.nav-hamburger span{display:block;width:22px;height:2px;background:var(--white);border-radius:2px}
+.nav-drawer{display:none;position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;background:rgba(0,0,0,.97);z-index:499;flex-direction:column;align-items:center;justify-content:center;gap:30px}
+.nav-drawer.open{display:flex}
+.nav-drawer a{font-family:'Playfair Display',serif;font-size:26px;color:var(--white);text-decoration:none;opacity:.8}
+.page-offset{padding-top:var(--nav-h)}
+
+/* ── HERO / COLLAGE ── */
+.hero{position:relative;min-height:92vh;background:var(--black);overflow:hidden;border-bottom:1px solid rgba(255,255,255,.08)}
+.hero-title-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;pointer-events:none;text-align:center}
+.hero-title{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(46px,8vw,108px);line-height:.95;color:var(--white)}
+.hero-title em{font-style:italic;font-weight:400}
+.hero-sub{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--white);opacity:.5;margin-top:18px}
+
+/* scattered placeholder "ephemera" — swap these for real photographed assets later */
+.scrap{position:absolute;border:1.5px dashed rgba(255,255,255,.35);background:rgba(255,255,255,.03);color:rgba(255,255,255,.4);
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;line-height:1.3;z-index:2}
+.scrap-label{position:absolute;font-family:'Short Stack',cursive;font-size:22px;color:var(--white);opacity:.85;z-index:6;pointer-events:none}
+
+/* ── FILTER BAR ── */
+.filters{max-width:1100px;margin:0 auto;padding:56px 32px 0;display:flex;gap:10px;flex-wrap:wrap}
+.filter-pill{font-family:'Space Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:transparent;color:var(--white);
+  cursor:pointer;opacity:.75;transition:opacity .2s,background .2s,color .2s}
+.filter-pill:hover{opacity:1}
+.filter-pill.active{opacity:1;background:var(--white);color:var(--black)}
+
+/* ── ARCHIVE GRID ── */
+.archive{max-width:1100px;margin:0 auto;padding:32px 32px 120px}
+.archive-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:20px}
+.card{
+  background:var(--white);color:#1a1a1a;border-radius:2px;padding:22px 22px 18px;
+  position:relative;box-shadow:0 10px 24px rgba(0,0,0,.35);transition:transform .25s ease,box-shadow .25s ease;
+  text-decoration:none;display:block;cursor:pointer;
+}
+.card:nth-child(3n+1){transform:rotate(-1.1deg)}
+.card:nth-child(3n+2){transform:rotate(.8deg)}
+.card:nth-child(3n+3){transform:rotate(-.5deg)}
+.card:hover{transform:rotate(0deg) translateY(-4px);box-shadow:0 16px 30px rgba(0,0,0,.45)}
+.card-tag{display:inline-block;font-family:'Space Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:999px;margin-bottom:14px}
+.card-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;line-height:1.15;margin-bottom:10px}
+.card-excerpt{font-family:'Space Mono',monospace;font-size:13px;line-height:1.65;opacity:.8;margin-bottom:18px}
+.card-stub{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed rgba(0,0,0,.25);padding-top:10px;
+  font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.65}
+
+/* honest-labeling for posts that don't have real copy yet — visible on
+   the archive card itself, not just after clicking through */
+.coming-soon-tag{position:absolute;top:14px;right:14px;background:var(--black);color:var(--white);
+  font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 9px;border-radius:999px;z-index:2}
+.card-coming-soon .card-excerpt{opacity:.6}
+
+.empty-state{font-family:'Space Mono',monospace;font-size:13px;opacity:.55;padding:40px 0;text-align:center}
+
+/* ── SYMBOL BADGE + HIGHLIGHT CARDS — shared by the calculator's "big
+   six" and the homepage's "right now" transit snapshot: a small filled
+   circle in a planet's color holding its real glyph (never bare
+   colored text), a serif headline for the sign, mono data for the
+   degree. One card language, used everywhere a planet gets featured. ── */
+.symbol-badge{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  width:28px;height:28px;border-radius:50%;font-size:16px;font-weight:700;line-height:1}
+.symbol-badge.small{width:22px;height:22px;font-size:12px}
+
+.highlight-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hl-card{background:var(--white);color:var(--ink-1);border-radius:2px;padding:18px 14px;text-align:center;box-shadow:0 8px 18px rgba(0,0,0,.35)}
+.hl-label{display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px}
+.hl-sign{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;margin-bottom:4px;color:var(--ink-1)}
+.hl-deg{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-2)}
+@media(max-width:700px){
+  .highlight-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ── SCROLL REVEAL — cards fade, lift, and grow slightly in as they enter
+   view (a subtle expand, not just a fade), on a slightly bouncy easing.
+   Disabled entirely for anyone with reduced-motion set (ADA / WCAG 2.3.3). ── */
+.reveal{opacity:0;transform:translateY(22px) scale(.92);transition:opacity .55s ease,transform .55s cubic-bezier(.34,1.4,.4,1)}
+.reveal.visible{opacity:1;transform:translateY(0) scale(1)}
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1!important;transform:none!important;transition:none!important}
+}
+
+/* ── ACCESSIBILITY: visible focus ring on every interactive element.
+   Teal specifically — it's one of the only colors in the palette that
+   clears 3:1 contrast against both pure black AND pure white, so the
+   ring stays visible regardless of what it's sitting on. ── */
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
+  outline:3px solid var(--teal);outline-offset:2px;
+}
+
+/* ── FOOTER ── */
+footer{background:var(--black);border-top:1px solid rgba(255,255,255,.06);padding:36px 40px}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.footer-inner a{color:var(--white);opacity:.55;text-decoration:none;font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:opacity .2s}
+.footer-inner a:hover{opacity:.9}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .nav-links{display:none}
+  .nav-hamburger{display:flex}
+  .archive-grid{grid-template-columns:1fr 1fr}
+  .card:nth-child(n){transform:none}
+  .hero{min-height:70vh}
+  .scrap{display:none}
+}
+@media(max-width:560px){
+  .archive-grid{grid-template-columns:1fr}
+  .filters{padding-top:36px}
+}
