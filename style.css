@@ -154,7 +154,7 @@ footer{background:var(--black);border-top:1px solid rgba(255,255,255,.06);paddin
   .archive-grid{grid-template-columns:1fr 1fr}
   .card:nth-child(n){transform:none}
   .hero{min-height:70vh}
-  .scrap{display:none}
+  .scrap,.scrap-photo{display:none}
 }
 @media(max-width:560px){
   .archive-grid{grid-template-columns:1fr}
