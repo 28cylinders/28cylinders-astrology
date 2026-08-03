@@ -187,15 +187,13 @@ function calculateAndRender({ dateValue, timeKnown, timeValue, place, scrollTo =
     latitude: place.lat, longitude: place.lon,
   });
 
-  let horoscope;
-  try {
-    horoscope = new Horoscope({ origin, houseSystem: 'placidus', zodiac: 'tropical' });
-  } catch(placidusErr){
-    // Placidus is mathematically undefined at extreme latitudes (polar circle) — fall back gracefully.
-    horoscope = new Horoscope({ origin, houseSystem: 'whole-sign', zodiac: 'tropical' });
-    formError.textContent = 'Placidus houses aren\'t defined this close to the poles — showing Whole Sign houses instead.';
-    formError.style.display = 'block';
-  }
+  // Whole Sign houses — each house is exactly one zodiac sign (house 1 =
+  // whichever sign the Ascendant falls in, house 2 = the next sign, and
+  // so on). Chosen to match the reference app Sofi verified against
+  // (its 0°-cusp, one-sign-per-house pattern is the Whole Sign signature)
+  // — and it has no polar-latitude edge case the way Placidus does, so
+  // no fallback logic is needed here anymore.
+  const horoscope = new Horoscope({ origin, houseSystem: 'whole-sign', zodiac: 'tropical' });
 
   renderResults({ origin, horoscope, timeKnown, scrollTo });
 }
@@ -266,17 +264,19 @@ function renderResults({ origin, horoscope, timeKnown, scrollTo = true }){
   results.classList.add('visible');
 
   resultsNote.innerHTML = `<strong>${selectedPlace.display_name}</strong> · local time used: ${origin.localTimeFormatted}
-    ${timeKnown ? '' : ' (solar noon, exact time unknown)'} · Placidus houses, tropical zodiac`;
+    ${timeKnown ? '' : ' (solar noon, exact time unknown)'} · Whole Sign houses, tropical zodiac`;
 
   // ── highlighted six (even number — a clean 3x2 / 2x3 grid, not 5) ──
   highlightGrid.innerHTML = '';
+  // order matters here: the "big three" (Sun, Moon, Rising) always come
+  // first, then Venus, Mars, Mercury after.
   const hlItems = [
     { label: 'Sun', body: horoscope.CelestialBodies.sun, key: 'sun' },
     { label: 'Moon', body: horoscope.CelestialBodies.moon, key: 'moon' },
-    { label: 'Mercury', body: horoscope.CelestialBodies.mercury, key: 'mercury' },
+    { label: 'Rising', body: timeKnown ? horoscope.Ascendant : null, key: 'ascendant' },
     { label: 'Venus', body: horoscope.CelestialBodies.venus, key: 'venus' },
     { label: 'Mars', body: horoscope.CelestialBodies.mars, key: 'mars' },
-    { label: 'Rising', body: timeKnown ? horoscope.Ascendant : null, key: 'ascendant' },
+    { label: 'Mercury', body: horoscope.CelestialBodies.mercury, key: 'mercury' },
   ];
 
   hlItems.forEach(item => {
@@ -299,14 +299,15 @@ function renderResults({ origin, horoscope, timeKnown, scrollTo = true }){
     highlightGrid.appendChild(card);
   });
 
-  // ── full placements — static rows, no expand/collapse (the detail
-  // paragraph was removed per feedback: sign, degree, house, retrograde
-  // is enough here). ──
+  // ── full placements — each row has two independent dropdowns (native
+  // <details>, no click-to-expand JS needed): "Rules" (body part) and
+  // "Represents" (themes), separate from each other per feedback. ──
   placementsList.innerHTML = '';
   BODY_ORDER.forEach(key => {
     const body = horoscope.CelestialBodies[key];
     if(!body) return;
     const retroTitle = 'Retrograde — appears to move backward from Earth\'s point of view';
+    const info = ASTRO_CONTENT.PLANET_INFO[key];
     const row = document.createElement('div');
     row.className = 'placement-row reveal';
     row.innerHTML = `
@@ -315,6 +316,8 @@ function renderResults({ origin, horoscope, timeKnown, scrollTo = true }){
         <div class="placement-mid"><span class="sign-name">${body.Sign.label}</span><span class="deg-value">${degLabel(body)}</span></div>
         <div class="placement-right">${body.isRetrograde ? `<span class="retro-badge" title="${retroTitle}" aria-label="Retrograde">${ASTRO_CONTENT.RETROGRADE_SYMBOL}</span>` : ''} ${timeKnown ? 'House ' + body.House.id : ''}</div>
       </div>
+      <details class="planet-detail"><summary>Rules</summary><p><strong>Sign:</strong> ${info.rulesSign}<br><strong>Body:</strong> ${info.bodyPart}</p></details>
+      <details class="planet-detail"><summary>Represents</summary><p>${info.themes}</p></details>
     `;
     placementsList.appendChild(row);
   });
@@ -330,6 +333,7 @@ function renderResults({ origin, horoscope, timeKnown, scrollTo = true }){
       // keep houses scoped to the same 10, so every symbol/color lookup is defined.
       const planetsInHouse = horoscope.CelestialBodies.all.filter(b => b.House.id === house.id && BODY_ORDER.includes(b.key));
       const sw = getSwatch(ASTRO_COLORS.HOUSE_COLOR_KEYS[(house.id - 1) % ASTRO_COLORS.HOUSE_COLOR_KEYS.length]);
+      const hInfo = ASTRO_CONTENT.HOUSE_INFO[house.id];
       const row = document.createElement('div');
       row.className = 'house-row reveal';
       row.style.borderLeft = `4px solid ${sw.cssVar}`;
@@ -338,7 +342,8 @@ function renderResults({ origin, horoscope, timeKnown, scrollTo = true }){
           <span class="house-name">${ASTRO_CONTENT.houseIcon(house.id, sw.hex)}House ${house.id}</span>
           <span class="house-cusp">${house.Sign.label} ${house.ChartPosition.StartPosition.Ecliptic.ArcDegreesFormatted30}</span>
         </div>
-        <p class="house-meaning">${ASTRO_CONTENT.HOUSE_INFO[house.id]}</p>
+        <details class="planet-detail"><summary>Represents</summary><p>${hInfo.represents}</p></details>
+        <details class="planet-detail"><summary>Rules</summary><p>${hInfo.rules}</p></details>
         ${planetsInHouse.length
           ? `<div class="house-planet-chips">${planetsInHouse.map(b => `<span class="house-planet-chip">${badge(b.key, 'small')}${b.label}</span>`).join('')}</div>`
           : `<p class="house-planets-empty">No planets here</p>`}

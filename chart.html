@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Read My Chart — [Working Title]</title>
+<title>Read My Chart — 28 Orbits</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500&family=Short+Stack&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -82,29 +82,43 @@
 .section-label:first-of-type{margin-top:0;padding-top:0;border-top:none}
 
 .placements-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-items:start}
-.placement-row{background:var(--white);color:var(--ink-1);border-radius:2px;padding:14px 16px;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.placement-row{background:var(--white);color:var(--ink-1);border-radius:2px;padding:14px 16px;box-shadow:0 4px 10px rgba(0,0,0,.25);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease}
+.placement-row:hover{transform:scale(1.03) translateY(-3px);box-shadow:0 14px 26px rgba(0,0,0,.4);z-index:3;position:relative}
 .placement-top{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:4px 10px;align-items:center;font-family:'Space Mono',monospace}
-.placement-name{grid-column:1;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.placement-name{grid-column:1;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:8px}
 /* headline (sign, serif) + data (degree, mono) — same split as the
    highlight cards, so the two tiers finally share one visual language */
 .placement-mid{grid-column:1;display:flex;align-items:baseline;gap:8px}
 .placement-mid .sign-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink-1)}
 .placement-mid .deg-value{font-size:11.5px;color:var(--ink-2)}
-.placement-right{grid-column:2;grid-row:1 / span 2;font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:8px;justify-content:flex-end;white-space:nowrap}
+.placement-right{grid-column:2;grid-row:1 / span 2;font-size:11.5px;color:var(--ink-2);display:flex;align-items:center;gap:8px;justify-content:flex-end;white-space:nowrap}
 .retro-badge{display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:var(--ink-3);color:#fff;font-size:16px;font-weight:700;cursor:help}
+
+/* two independent dropdowns per placement — "Rules" (body part) and
+   "Represents" (themes) — native <details>/<summary>, no custom JS
+   needed for the expand/collapse itself */
+.planet-detail{grid-column:1 / -1;margin-top:10px;border-top:1px dashed rgba(0,0,0,.15);padding-top:8px}
+.planet-detail summary{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-2);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}
+.planet-detail summary::-webkit-details-marker{display:none}
+.planet-detail summary::before{content:'▸';font-size:9px;transition:transform .15s ease}
+.planet-detail[open] summary::before{transform:rotate(90deg)}
+.planet-detail p{font-family:'Space Mono',monospace;font-size:12px;line-height:1.6;color:var(--ink-1);margin-top:6px;padding-left:15px}
 
 .houses-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:start}
 /* min-height keeps every house card the same size in the common case
    (0–3 planets); a house with more than 3 just grows taller naturally
    rather than being clipped or forcing every other card to match it. */
-.house-row{background:var(--white);color:var(--ink-1);border-radius:2px;padding:13px 15px;box-shadow:0 4px 10px rgba(0,0,0,.25);min-height:185px}
+.house-row{background:var(--white);color:var(--ink-1);border-radius:2px;padding:13px 15px;box-shadow:0 4px 10px rgba(0,0,0,.25);min-height:185px;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease}
+.house-row:hover{transform:scale(1.03) translateY(-3px);box-shadow:0 14px 26px rgba(0,0,0,.4);z-index:3;position:relative}
 .house-top{display:flex;flex-direction:column;gap:3px;font-family:'Space Mono',monospace;font-size:12.5px}
 .house-name{font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-1);display:flex;align-items:center;gap:9px}
 .house-name svg{flex-shrink:0}
 .house-cusp{color:var(--ink-2);font-size:11.5px}
 .house-planet-chips{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(0,0,0,.15);display:flex;flex-wrap:wrap;gap:6px}
 .house-planet-chip{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--ink-1)}
-.house-meaning{margin-top:8px;font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-2);line-height:1.5}
 .house-planets-empty{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(0,0,0,.15);font-family:'Space Mono',monospace;font-size:11.5px;color:var(--ink-3)}
 
 @media(max-width:700px){
@@ -118,30 +132,14 @@
 </style>
 </head>
 <body class="page-offset">
-<nav id="nav" role="navigation" aria-label="Main navigation">
-  <a class="nav-logo" href="index.html">[Working Title]<span aria-hidden="true">.</span></a>
-  <ul class="nav-links" role="list">
-    <li><a href="index.html">The Archive</a></li>
-    <li><a href="chart.html">Read My Chart</a></li>
-    <li><a href="https://28cylinders.com" target="_blank" rel="noopener">28 Cylinders ↗</a></li>
-    <li><a href="mailto:hi@28cylinders.com">Contact</a></li>
-  </ul>
-  <button class="nav-hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
-</nav>
-<div class="nav-drawer" id="drawer" role="dialog" aria-label="Mobile menu">
-  <a href="index.html">The Archive</a>
-  <a href="chart.html">Read My Chart</a>
-  <a href="https://28cylinders.com">28 Cylinders</a>
-  <a href="mailto:hi@28cylinders.com">Contact</a>
-</div>
+<div id="site-nav"></div>
+<script src="chrome.js"></script>
 
 <section class="chart-wrap">
   <div class="chart-head">
     <p class="chart-eyebrow">Birth Chart Calculator</p>
     <h1 class="serif chart-title">Read my chart.</h1>
-    <p class="chart-sub">Date, time, and place of birth in — every planet, its degree, and its house out. Tropical zodiac, Placidus houses. No interpretations yet, just the raw placements.</p>
+    <p class="chart-sub">Date, time, and place of birth in — every planet, its degree, and its house out. Tropical zodiac, Whole Sign houses. No interpretations yet, just the raw placements.</p>
   </div>
 
   <div class="restore-banner" id="restoreBanner">
@@ -187,7 +185,7 @@
   <div class="results" id="results" aria-live="polite">
     <p class="results-note" id="resultsNote"></p>
 
-    <p class="section-label">Sun · Moon · Mercury · Venus · Mars · Rising</p>
+    <p class="section-label">Sun · Moon · Rising · Venus · Mars · Mercury</p>
     <div class="highlight-grid" id="highlightGrid"></div>
 
     <p class="section-label">Every placement</p>
@@ -198,20 +196,8 @@
   </div>
 </section>
 
-<footer>
-  <div class="footer-inner">
-    <span>© 2026 28 Cylinders</span>
-    <a href="https://28cylinders.com" target="_blank" rel="noopener">28cylinders.com</a>
-  </div>
-</footer>
+<div id="site-footer"></div>
 
-<script>
-const nav=document.getElementById('nav');
-window.addEventListener('scroll',()=>nav.classList.toggle('solid',window.scrollY>10),{passive:true});
-const hamburger=document.getElementById('hamburger'),drawer=document.getElementById('drawer');
-hamburger.addEventListener('click',()=>{const open=drawer.classList.toggle('open');hamburger.setAttribute('aria-expanded',open);});
-drawer.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{drawer.classList.remove('open');hamburger.setAttribute('aria-expanded',false);}));
-</script>
 <script src="colors.js"></script>
 <script src="content.js"></script>
 <script src="vendor/circular-natal-horoscope.bundle.js"></script>

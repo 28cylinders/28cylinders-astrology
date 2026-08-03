@@ -72,4 +72,22 @@ const POSTS = [
     cover: '',
     published: false
   },
+  {
+    id: 'north-south-node-explained',
+    title: 'Your North and South Node, Explained',
+    category: 'Nodes',
+    date: '2026-08-02',
+    excerpt: 'What you\'re karmically pulling away from (South Node) and growing toward (North Node) — the part of your chart that isn\'t about personality at all.',
+    cover: '',
+    published: false
+  },
+  {
+    id: 'leo-season-guide',
+    title: 'What Leo Season Actually Asks of You',
+    category: 'Transits',
+    date: '2026-08-02',
+    excerpt: 'Placeholder — what shifts across the collective mood while the Sun moves through Leo, and what it means for the signs that feel it hardest.',
+    cover: '',
+    published: false
+  },
 ];

@@ -15,7 +15,9 @@
    ══════════════════════════════════════════════════════ */
 
 const REFERENCE_UTC_ANCHOR = { lat: 64.1466, lon: -21.9426 }; // Reykjavik
-const TRANSIT_KEYS = ['sun', 'moon', 'mercury', 'venus', 'mars'];
+// order: Sun, Moon always first (Rising slots in right after them, only
+// when we have it), then Venus, Mars, Mercury
+const TRANSIT_KEYS = ['sun', 'moon', 'venus', 'mars', 'mercury'];
 
 const transitGrid = document.getElementById('transitGrid');
 const transitSub = document.getElementById('transitSub');
@@ -61,7 +63,7 @@ function renderBaseSnapshot(){
     hour: now.getUTCHours(), minute: now.getUTCMinutes(),
     latitude: REFERENCE_UTC_ANCHOR.lat, longitude: REFERENCE_UTC_ANCHOR.lon,
   });
-  const horoscope = new THoroscope({ origin, houseSystem: 'placidus', zodiac: 'tropical' });
+  const horoscope = new THoroscope({ origin, houseSystem: 'whole-sign', zodiac: 'tropical' });
   transitSub.textContent = formatNow() + ' — planet signs shown here don\'t depend on location, only the moment.';
   renderTransitCards(planetItems(horoscope));
   return horoscope;
@@ -74,14 +76,11 @@ function addRisingWithLocation(lat, lon){
     hour: now.getHours(), minute: now.getMinutes(),
     latitude: lat, longitude: lon,
   });
-  let horoscope;
-  try {
-    horoscope = new THoroscope({ origin, houseSystem: 'placidus', zodiac: 'tropical' });
-  } catch(e){
-    horoscope = new THoroscope({ origin, houseSystem: 'whole-sign', zodiac: 'tropical' });
-  }
+  const horoscope = new THoroscope({ origin, houseSystem: 'whole-sign', zodiac: 'tropical' });
   const rising = { key: 'ascendant', body: horoscope.Ascendant, label: 'Rising' };
-  renderTransitCards([...planetItems(horoscope), rising]);
+  // Rising slots in right after Sun + Moon, matching the calculator's order
+  const items = planetItems(horoscope);
+  renderTransitCards([...items.slice(0, 2), rising, ...items.slice(2)]);
   transitSub.textContent = formatNow() + ' — including your Rising sign, based on your current location.';
 }
 

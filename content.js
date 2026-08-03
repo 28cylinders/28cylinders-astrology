@@ -1,25 +1,30 @@
 /* ══════════════════════════════════════════════════════
    REFERENCE CONTENT — traditional astrological associations,
    not interpretive essays (those come later from posts.js).
-   PLANET_INFO: body part + themes each planet traditionally rules.
-   HOUSE_INFO: what each of the 12 houses represents.
+   PLANET_INFO: which sign each planet rules, the body part it
+   traditionally governs, and its themes.
+   HOUSE_INFO: what each house represents, and its natural sign/ruler.
    houseIcon(id, color): a small inline SVG glyph per house, tinted
    to that house's color — simple geometric shapes, not photos
    (matches the same "placeholder now, real collage art later"
    approach as everything else on this site).
    ══════════════════════════════════════════════════════ */
 
+// rulesSign is here specifically to stop the planet/sign mix-up — e.g.
+// "Uranus" and "Aquarius" are related (Uranus rules Aquarius) but not
+// the same thing, and the themes text alone didn't make that connection
+// explicit. Traditional/modern splits are noted where they differ.
 const PLANET_INFO = {
-  sun:     { bodyPart: 'Heart, spine',            themes: 'Identity, ego, vitality, willpower, life purpose' },
-  moon:    { bodyPart: 'Stomach, chest',           themes: 'Emotions, instinct, habit, home, the subconscious' },
-  mercury: { bodyPart: 'Hands, arms, lungs',       themes: 'Communication, thinking, learning, perception' },
-  venus:   { bodyPart: 'Throat, kidneys, skin',    themes: 'Love, beauty, values, pleasure, attraction' },
-  mars:    { bodyPart: 'Muscles, head, blood',     themes: 'Action, drive, desire, courage, conflict' },
-  jupiter: { bodyPart: 'Liver, hips, thighs',      themes: 'Expansion, luck, growth, philosophy, optimism' },
-  saturn:  { bodyPart: 'Bones, teeth, knees',      themes: 'Discipline, limits, responsibility, structure, time' },
-  uranus:  { bodyPart: 'Ankles, nervous system',   themes: 'Rebellion, innovation, sudden change, individuality' },
-  neptune: { bodyPart: 'Feet, lymphatic system',   themes: 'Dreams, illusion, spirituality, intuition, escapism' },
-  pluto:   { bodyPart: 'Reproductive system',      themes: 'Transformation, power, death & rebirth, the unconscious' },
+  sun:     { rulesSign: 'Leo',                          bodyPart: 'Heart, spine',          themes: 'Identity, ego, vitality, willpower, life purpose' },
+  moon:    { rulesSign: 'Cancer',                        bodyPart: 'Stomach, chest',        themes: 'Emotions, instinct, habit, home, the subconscious' },
+  mercury: { rulesSign: 'Gemini & Virgo',                 bodyPart: 'Hands, arms, lungs',    themes: 'Communication, thinking, learning, perception' },
+  venus:   { rulesSign: 'Taurus & Libra',                 bodyPart: 'Throat, kidneys, skin', themes: 'Love, beauty, values, pleasure, attraction' },
+  mars:    { rulesSign: 'Aries (traditionally also Scorpio)', bodyPart: 'Muscles, head, blood', themes: 'Action, drive, desire, courage, conflict' },
+  jupiter: { rulesSign: 'Sagittarius (traditionally also Pisces)', bodyPart: 'Liver, hips, thighs', themes: 'Expansion, luck, growth, philosophy, optimism' },
+  saturn:  { rulesSign: 'Capricorn (traditionally also Aquarius)', bodyPart: 'Bones, teeth, knees', themes: 'Discipline, limits, responsibility, structure, time' },
+  uranus:  { rulesSign: 'Aquarius (modern ruler)',        bodyPart: 'Ankles, nervous system', themes: 'Rebellion, innovation, sudden change, individuality' },
+  neptune: { rulesSign: 'Pisces (modern ruler)',          bodyPart: 'Feet, lymphatic system', themes: 'Dreams, illusion, spirituality, intuition, escapism' },
+  pluto:   { rulesSign: 'Scorpio (modern ruler)',         bodyPart: 'Reproductive system',   themes: 'Transformation, power, death & rebirth, the unconscious' },
 };
 
 // standard Unicode astrological glyphs — same symbols used on real charts
@@ -31,19 +36,23 @@ const PLANET_SYMBOLS = {
 };
 const RETROGRADE_SYMBOL = '℞'; // the conventional retrograde mark used in professional astrology software
 
+// each house's "natural" sign + planetary ruler — the classical mapping
+// (house 1 ~ Aries ~ Mars, house 2 ~ Taurus ~ Venus, and so on around the
+// wheel), independent of what's actually in someone's real chart. This is
+// reference/teaching content, not a claim about any specific person's houses.
 const HOUSE_INFO = {
-  1:  'Self, identity, appearance, first impressions',
-  2:  'Money, possessions, self-worth, values',
-  3:  'Communication, siblings, local environment, early learning',
-  4:  'Home, family, roots, emotional foundation',
-  5:  'Creativity, romance, pleasure, children, self-expression',
-  6:  'Daily routine, health, work, service',
-  7:  'Partnerships, marriage, one-on-one relationships',
-  8:  'Intimacy, shared resources, transformation, death & rebirth',
-  9:  'Philosophy, higher education, travel, beliefs',
-  10: 'Career, public image, ambition, reputation',
-  11: 'Friendship, community, groups, hopes and goals',
-  12: 'Subconscious, isolation, spirituality, hidden things, endings',
+  1:  { represents: 'Self, identity, appearance, first impressions',              rules: 'Aries, ruled by Mars' },
+  2:  { represents: 'Money, possessions, self-worth, values',                     rules: 'Taurus, ruled by Venus' },
+  3:  { represents: 'Communication, siblings, local environment, early learning', rules: 'Gemini, ruled by Mercury' },
+  4:  { represents: 'Home, family, roots, emotional foundation',                  rules: 'Cancer, ruled by the Moon' },
+  5:  { represents: 'Creativity, romance, pleasure, children, self-expression',   rules: 'Leo, ruled by the Sun' },
+  6:  { represents: 'Daily routine, health, work, service',                       rules: 'Virgo, ruled by Mercury' },
+  7:  { represents: 'Partnerships, marriage, one-on-one relationships',           rules: 'Libra, ruled by Venus' },
+  8:  { represents: 'Intimacy, shared resources, transformation, death & rebirth',rules: 'Scorpio, ruled by Pluto (traditionally Mars)' },
+  9:  { represents: 'Philosophy, higher education, travel, beliefs',              rules: 'Sagittarius, ruled by Jupiter' },
+  10: { represents: 'Career, public image, ambition, reputation',                 rules: 'Capricorn, ruled by Saturn' },
+  11: { represents: 'Friendship, community, groups, hopes and goals',             rules: 'Aquarius, ruled by Uranus (traditionally Saturn)' },
+  12: { represents: 'Subconscious, isolation, spirituality, hidden things, endings', rules: 'Pisces, ruled by Neptune (traditionally Jupiter)' },
 };
 
 const HOUSE_ICON_PATHS = {

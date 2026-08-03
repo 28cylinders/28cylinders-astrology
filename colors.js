@@ -69,6 +69,7 @@ const HOUSE_COLOR_KEYS = [
 const CATEGORY_COLORS = {
   'Venus': 'pink', 'Moon': 'lavender', 'Mercury': 'sky', 'Rising': 'fuchsia',
   'Houses': 'purple', 'Transits': 'orange', 'Compatibility': 'teal', 'Birth Chart': 'yellow',
+  'Nodes': 'violet',
 };
 
 window.ASTRO_COLORS = { PALETTE, swatch, contrastRatio, textOn, PLANET_COLORS, HOUSE_COLOR_KEYS, CATEGORY_COLORS };

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Read My Chart — [Working Title]</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500&family=Short+Stack&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* --ink-1/2/3 and .symbol-badge/.highlight-grid/.hl-* now live in the
+   shared style.css, since the homepage's "right now" snapshot uses the
+   exact same card language as this page's highlight cards. */
+
+.chart-wrap{max-width:800px;margin:0 auto;padding:110px 32px 24px}
+.chart-head{text-align:center;margin-bottom:32px}
+.chart-eyebrow{font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.6;margin-bottom:16px}
+.chart-title{font-size:clamp(30px,5vw,46px);font-weight:600;line-height:1.1;margin-bottom:16px}
+.chart-sub{font-family:'Space Mono',monospace;font-size:14.5px;line-height:1.75;opacity:.82;max-width:520px;margin:0 auto}
+
+.form-card{background:var(--white);color:var(--ink-1);border-radius:2px;padding:36px 32px;box-shadow:0 10px 30px rgba(0,0,0,.4);transform:rotate(-.3deg)}
+.field{margin-bottom:22px}
+.field label{display:block;font-family:'Space Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:8px}
+.field input[type=date],.field input[type=time],.field input[type=text]{
+  width:100%;font-family:'Space Mono',monospace;font-size:15px;padding:11px 12px;border:1.5px solid rgba(0,0,0,.25);
+  border-radius:2px;background:#fafafa;color:var(--ink-1);
+}
+.field input:focus-visible{outline:3px solid var(--teal);outline-offset:1px;border-color:var(--ink-1)}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.toggle-row input{width:17px;height:17px}
+.toggle-row label{font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-1);margin:0}
+.time-note{font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;color:var(--ink-2);margin-top:-10px;margin-bottom:20px}
+
+.place-wrap{position:relative}
+.place-row{display:flex;gap:8px}
+.place-row input{flex:1}
+.btn-find{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:0 18px;border:1.5px solid #1a1a1a;background:#1a1a1a;color:#fff;border-radius:2px;cursor:pointer;white-space:nowrap}
+.btn-find:hover{opacity:.85}
+.place-results{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:30;background:#fff;border:1px solid rgba(0,0,0,.15);
+  border-radius:2px;max-height:230px;overflow-y:auto;box-shadow:0 10px 24px rgba(0,0,0,.2);display:none}
+.place-results.open{display:block}
+.place-option{display:block;width:100%;text-align:left;font-family:'Space Mono',monospace;font-size:12.5px;padding:11px 12px;
+  border:none;border-bottom:1px solid rgba(0,0,0,.08);background:#fff;color:var(--ink-1);cursor:pointer}
+.place-option:last-child{border-bottom:none}
+.place-option:hover,.place-option:focus-visible{background:#eee}
+.place-status{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-2);margin-top:8px}
+
+.btn-calc{width:100%;margin-top:8px;font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:15px;border:none;border-radius:999px;background:#1a1a1a;color:#fff;cursor:pointer;transition:transform .15s}
+.btn-calc:hover{transform:translateY(-2px)}
+.btn-calc:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.form-error{font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;color:var(--pink);margin-top:14px}
+
+/* saved-on-this-device chart banner — localStorage is per-browser/per-
+   computer by design, so this never shows anyone else's chart. */
+.restore-banner{display:none;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.25);border-radius:2px;
+  padding:14px 18px;margin-bottom:24px;font-family:'Space Mono',monospace;font-size:12px;color:var(--white);
+  align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.restore-banner.visible{display:flex}
+.restore-banner button{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  background:none;border:1px solid rgba(255,255,255,.3);color:var(--white);padding:7px 14px;border-radius:999px;cursor:pointer}
+.restore-banner button:hover{background:rgba(255,255,255,.1)}
+
+/* ── RESULTS ──
+   tight, deliberate grids everywhere instead of loose stacked lists —
+   fixed column counts (not auto-fit) so every section reads as one
+   intentional block, not a sprawl. Clear hierarchy: the sign name is
+   always the largest/darkest thing in each card; everything else
+   (labels, degrees, retrograde/house notes) steps down in size and
+   uses ink-2/ink-3, never a bright color, as the actual text color —
+   the planet/house color only ever appears as a border or dot. */
+.results{display:none;margin-top:44px}
+.results.visible{display:block}
+.results-note{font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.8;opacity:.8;text-align:center;margin-bottom:28px;padding:0 20px}
+.results-note strong{opacity:1}
+
+.section-label{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.55;
+  margin:40px 0 14px;text-align:center;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
+.section-label:first-of-type{margin-top:0;padding-top:0;border-top:none}
+
+.placements-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-items:start}
+.placement-row{background:var(--white);color:var(--ink-1);border-radius:2px;padding:14px 16px;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.placement-top{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:4px 10px;align-items:center;font-family:'Space Mono',monospace}
+.placement-name{grid-column:1;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+/* headline (sign, serif) + data (degree, mono) — same split as the
+   highlight cards, so the two tiers finally share one visual language */
+.placement-mid{grid-column:1;display:flex;align-items:baseline;gap:8px}
+.placement-mid .sign-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink-1)}
+.placement-mid .deg-value{font-size:11.5px;color:var(--ink-2)}
+.placement-right{grid-column:2;grid-row:1 / span 2;font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:8px;justify-content:flex-end;white-space:nowrap}
+.retro-badge{display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:var(--ink-3);color:#fff;font-size:16px;font-weight:700;cursor:help}
+
+.houses-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:start}
+/* min-height keeps every house card the same size in the common case
+   (0–3 planets); a house with more than 3 just grows taller naturally
+   rather than being clipped or forcing every other card to match it. */
+.house-row{background:var(--white);color:var(--ink-1);border-radius:2px;padding:13px 15px;box-shadow:0 4px 10px rgba(0,0,0,.25);min-height:185px}
+.house-top{display:flex;flex-direction:column;gap:3px;font-family:'Space Mono',monospace;font-size:12.5px}
+.house-name{font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-1);display:flex;align-items:center;gap:9px}
+.house-name svg{flex-shrink:0}
+.house-cusp{color:var(--ink-2);font-size:11.5px}
+.house-planet-chips{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(0,0,0,.15);display:flex;flex-wrap:wrap;gap:6px}
+.house-planet-chip{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--ink-1)}
+.house-meaning{margin-top:8px;font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-2);line-height:1.5}
+.house-planets-empty{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(0,0,0,.15);font-family:'Space Mono',monospace;font-size:11.5px;color:var(--ink-3)}
+
+@media(max-width:700px){
+  .houses-list{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .chart-wrap{padding-top:100px}
+  .form-card{padding:26px 20px}
+  .placements-list{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body class="page-offset">
+<nav id="nav" role="navigation" aria-label="Main navigation">
+  <a class="nav-logo" href="index.html">[Working Title]<span aria-hidden="true">.</span></a>
+  <ul class="nav-links" role="list">
+    <li><a href="index.html">The Archive</a></li>
+    <li><a href="chart.html">Read My Chart</a></li>
+    <li><a href="https://28cylinders.com" target="_blank" rel="noopener">28 Cylinders ↗</a></li>
+    <li><a href="mailto:hi@28cylinders.com">Contact</a></li>
+  </ul>
+  <button class="nav-hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-drawer" id="drawer" role="dialog" aria-label="Mobile menu">
+  <a href="index.html">The Archive</a>
+  <a href="chart.html">Read My Chart</a>
+  <a href="https://28cylinders.com">28 Cylinders</a>
+  <a href="mailto:hi@28cylinders.com">Contact</a>
+</div>
+
+<section class="chart-wrap">
+  <div class="chart-head">
+    <p class="chart-eyebrow">Birth Chart Calculator</p>
+    <h1 class="serif chart-title">Read my chart.</h1>
+    <p class="chart-sub">Date, time, and place of birth in — every planet, its degree, and its house out. Tropical zodiac, Placidus houses. No interpretations yet, just the raw placements.</p>
+  </div>
+
+  <div class="restore-banner" id="restoreBanner">
+    <span>Showing the last chart calculated on this device.</span>
+    <button type="button" id="clearSavedChart">Start a new chart</button>
+  </div>
+
+  <form class="form-card" id="chartForm">
+    <div class="field">
+      <label for="birthDate">Birth date</label>
+      <input type="date" id="birthDate" required>
+    </div>
+
+    <div class="toggle-row">
+      <input type="checkbox" id="knowsTime" checked>
+      <label for="knowsTime">I know my exact birth time</label>
+    </div>
+
+    <div class="field" id="timeField">
+      <label for="birthTime">Birth time (as exact as possible)</label>
+      <input type="time" id="birthTime">
+    </div>
+    <p class="time-note" id="unknownTimeNote" style="display:none">
+      Without an exact time we can't reliably place your Rising sign or houses — those are extremely time-sensitive. We'll still calculate your Sun, Moon, and planet signs using solar noon as a stand-in; the Moon is usually right but can be off if you were born close to a sign change.
+    </p>
+
+    <div class="field">
+      <label for="birthPlace">Birth place</label>
+      <div class="place-wrap" id="placeWrap">
+        <div class="place-row">
+          <input type="text" id="birthPlace" placeholder="Start typing a city…" autocomplete="off">
+          <button type="button" class="btn-find" id="findPlace">Find</button>
+        </div>
+        <div class="place-results" id="placeResults"></div>
+      </div>
+      <p class="place-status" id="placeStatus"></p>
+    </div>
+
+    <button type="submit" class="btn-calc" id="calcBtn" disabled>Calculate my chart</button>
+    <p class="form-error" id="formError" style="display:none" role="alert"></p>
+  </form>
+
+  <div class="results" id="results" aria-live="polite">
+    <p class="results-note" id="resultsNote"></p>
+
+    <p class="section-label">Sun · Moon · Mercury · Venus · Mars · Rising</p>
+    <div class="highlight-grid" id="highlightGrid"></div>
+
+    <p class="section-label">Every placement</p>
+    <div class="placements-list" id="placementsList"></div>
+
+    <p class="section-label" id="housesLabel">The houses</p>
+    <div class="houses-list" id="housesList"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 28 Cylinders</span>
+    <a href="https://28cylinders.com" target="_blank" rel="noopener">28cylinders.com</a>
+  </div>
+</footer>
+
+<script>
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('solid',window.scrollY>10),{passive:true});
+const hamburger=document.getElementById('hamburger'),drawer=document.getElementById('drawer');
+hamburger.addEventListener('click',()=>{const open=drawer.classList.toggle('open');hamburger.setAttribute('aria-expanded',open);});
+drawer.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{drawer.classList.remove('open');hamburger.setAttribute('aria-expanded',false);}));
+</script>
+<script src="colors.js"></script>
+<script src="content.js"></script>
+<script src="vendor/circular-natal-horoscope.bundle.js"></script>
+<script src="chart.js"></script>
+</body>
+</html>
