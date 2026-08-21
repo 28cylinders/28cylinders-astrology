@@ -15,13 +15,18 @@
    specific to this page's results: two style cards, a score meter, and
    a scored checklist — none of which exist anywhere else on the site. */
 
-.results{display:none;margin-top:44px}
+/* ── results reads like a short post: narrower than the form above it
+   (680px, same column width as post.html) so it's a column of writing,
+   not another wide tool panel. ── */
+.results{display:none;margin-top:44px;max-width:680px;margin-left:auto;margin-right:auto}
 .results.visible{display:block}
-.results-note{font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.8;opacity:.8;text-align:center;margin-bottom:28px;padding:0 20px}
-.results-note strong{opacity:1}
+.results-title{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(26px,4vw,34px);line-height:1.15;text-align:center;margin-bottom:10px;color:var(--white)}
+.results-note{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.02em;opacity:.55;text-align:center;margin-bottom:8px}
+.post-body{font-family:'Space Mono',monospace;font-size:15px;line-height:1.85;opacity:.85;color:var(--white)}
+.post-body p{margin-bottom:16px}
 .section-label{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.55;
   margin:40px 0 14px;text-align:center;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
-.section-label:first-of-type{margin-top:0;padding-top:0;border-top:none}
+.section-label:first-of-type{margin-top:32px}
 
 /* ── "reading the sky" spinner — a brief bit of theater between hitting
    Calculate and the reveal, instead of results just snapping into place.
@@ -39,29 +44,30 @@
 .calc-loading-text{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
 @media (prefers-reduced-motion: reduce){ .calc-spinner{animation:none} }
 
-/* ── two style cards: Mercury ("how you're funny") + Venus ("what
-   tickles you") — a big colored planet-glyph badge plus a soft wash of
-   that style's color behind it, so each card reads as one saturated
-   hue rather than a white card with a thin colored line at the top. ── */
-/* shared filled-circle glyph badge — the style-card header icon and the
-   modifier-row icon are the same shape at two sizes, set inline (each
-   card's color is data-driven, not knowable in CSS ahead of time). */
-.icon-circle{display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;box-shadow:0 4px 10px rgba(0,0,0,.28)}
+/* shared filled-circle glyph badge, used for the Mercury/Venus prose
+   icons below and inside the chart wheel legend — each color is
+   data-driven, not knowable in CSS ahead of time, so it's set inline. */
+.icon-circle{display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;box-shadow:0 4px 10px rgba(0,0,0,.28);flex-shrink:0}
 
-.style-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.style-card{color:var(--ink-1);border-radius:8px;padding:24px 22px;
-  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease}
-.style-card:hover{transform:translateY(-4px) scale(1.015)}
-.style-card-icon{margin-bottom:16px}
-.style-card-label{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px}
-.style-card-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;line-height:1.15;margin-bottom:10px;color:var(--ink-1)}
-.style-card-line{font-family:'Space Mono',monospace;font-size:13px;line-height:1.65;color:var(--ink-1);opacity:.85;margin-bottom:12px}
-.style-card-note{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+/* ── "how you're funny" / "what you find funny" — a planet-glyph badge
+   beside the paragraph, not a separate card, so this reads as writing
+   with an accent color, not a UI panel. ── */
+.prose-block{display:flex;gap:16px;align-items:flex-start;margin-bottom:8px}
+.prose-icon{margin-top:2px}
+.prose-lead{font-weight:700;color:var(--white);opacity:1}
+
+/* ── chart wheel — a focused, not a full professional, wheel: see the
+   buildChartWheel() comment in humor.js for what it actually draws. ── */
+.wheel-figure{text-align:center;margin:8px 0 28px}
+.wheel-svg{width:100%;max-width:320px;height:auto;margin:0 auto;display:block}
+.wheel-sign-label{font-size:13px;fill:rgba(255,255,255,.55)}
+.wheel-planet-glyph{font-size:13px;font-weight:700}
+.wheel-caption{font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.6;opacity:.55;max-width:420px;margin:14px auto 0}
 
 /* ── score meter — an actual progress ring, not a plain bar. Drawn at
    full stroke-dashoffset (empty) then animated to its real value once
    inserted, so the ring visibly fills in on reveal. ── */
-.score-block{text-align:center;max-width:520px;margin:0 auto}
+.score-block{text-align:center;margin:0 auto 8px}
 .score-ring-wrap{position:relative;width:190px;height:190px;margin:0 auto 4px}
 .score-ring-wrap svg{width:100%;height:100%;display:block}
 .score-ring-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:10}
@@ -69,30 +75,16 @@
 .score-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px;text-align:center}
 .score-number{font-family:'Playfair Display',serif;font-size:46px;font-weight:600;line-height:1;color:var(--white)}
 .score-tier{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-top:6px}
-.score-tier-desc{font-family:'Space Mono',monospace;font-size:13px;line-height:1.75;opacity:.85;padding:0 12px;margin-top:10px}
-.score-footnote{font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.6;opacity:.55;margin-top:14px;padding:0 12px}
+.score-tier-desc{font-family:'Space Mono',monospace;font-size:13px;line-height:1.75;opacity:.85;padding:0 12px;margin-top:10px;max-width:480px;margin-left:auto;margin-right:auto}
+.score-footnote{font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.6;opacity:.55}
 @media (prefers-reduced-motion: reduce){ .score-ring-fill{transition:none} }
 
-/* ── scored checklist — each row gets the actual planet/house glyph
-   for the placement it's checking, in that placement's real color
-   (same PLANET_COLORS the rest of the site uses), full-color on a hit
-   and desaturated on a miss, rather than a generic check/dash. ── */
-.modifier-list{display:flex;flex-direction:column;gap:10px;max-width:640px;margin:0 auto}
-.modifier-row{background:var(--white);color:var(--ink-1);border-radius:8px;padding:14px 16px;box-shadow:0 4px 10px rgba(0,0,0,.25);
-  display:flex;gap:14px;align-items:flex-start;text-align:left;transition:opacity .2s}
-.modifier-row.miss{opacity:.62}
-.modifier-icon{flex-shrink:0;margin-top:1px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
-.modifier-row.miss .modifier-icon{filter:grayscale(1)}
-.modifier-row.pending .modifier-icon{background:transparent!important;border:1.5px dashed var(--ink-3);color:var(--ink-3);box-shadow:none}
-.modifier-label{font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;letter-spacing:.03em;color:var(--ink-1);margin-bottom:4px}
-.modifier-pending-tag{font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:9.5px;color:var(--ink-3);border:1px solid rgba(0,0,0,.2);border-radius:999px;padding:2px 7px;margin-left:6px}
-.modifier-text{font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.6;color:var(--ink-2)}
+.chart-link-row{text-align:center;margin-top:36px}
+.btn-calc-secondary{display:inline-block;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:11px 22px;border:1.5px solid rgba(255,255,255,.3);color:var(--white);border-radius:999px;text-decoration:none;transition:background .2s}
+.btn-calc-secondary:hover{background:rgba(255,255,255,.1)}
 
-.disclosure{max-width:640px;margin:48px auto 0;font-family:'Space Mono',monospace;font-size:12px;line-height:1.7;opacity:.55;text-align:center;padding:0 20px}
-
-@media(max-width:700px){
-  .style-grid{grid-template-columns:1fr}
-}
+.disclosure{margin:40px auto 0;font-family:'Space Mono',monospace;font-size:12px;line-height:1.7;opacity:.55;text-align:center}
 </style>
 </head>
 <body class="page-offset">
@@ -103,7 +95,7 @@
   <div class="tool-head">
     <p class="tool-eyebrow">Humor Calculator</p>
     <h1 class="serif tool-title">How funny am I, really?</h1>
-    <p class="tool-sub">Mercury (how you think), Venus (what charms you), your 5th house (playfulness), and a few key aspects to Uranus and Jupiter — read together as a comedic style and a score. For fun, not a diagnosis.</p>
+    <p class="tool-sub">Mercury (how you think), Venus (what charms you), your 5th house (playfulness), and a few key aspects to Uranus and Jupiter, read together as a comedic style and a score. For fun, not a diagnosis.</p>
   </div>
 
   <div class="restore-banner" id="restoreBanner">
@@ -127,7 +119,7 @@
       <input type="time" id="birthTime">
     </div>
     <p class="time-note" id="unknownTimeNote" style="display:none">
-      Without an exact time we can't reliably check your 5th house — that's extremely time-sensitive. Everything else here (Mercury, Venus, Sun, Jupiter, and their aspects) still works fine using solar noon as a stand-in.
+      Without an exact time we can't reliably check your 5th house, since that's extremely time-sensitive. Everything else here (Mercury, Venus, Sun, Jupiter, and their aspects) still works fine using solar noon as a stand-in.
     </p>
 
     <div class="field">
@@ -152,18 +144,12 @@
   </div>
 
   <div class="results" id="results" aria-live="polite">
+    <h2 class="results-title">Your comedic profile</h2>
     <p class="results-note" id="resultsNote"></p>
 
-    <p class="section-label">Your comedic profile</p>
-    <div class="style-grid" id="styleGrid"></div>
+    <div class="post-body" id="resultsBody"></div>
 
-    <p class="section-label">Humor score</p>
-    <div class="score-block" id="scoreBlock"></div>
-
-    <p class="section-label">What's actually behind that number</p>
-    <div class="modifier-list" id="modifierList"></div>
-
-    <p class="disclosure">This is the exploratory, for-fun corner of an exploratory astrology site — the chart math underneath is real (whole sign houses, tropical zodiac, major aspects), but which placements "count" toward being funny, and how much, is our own read, not a settled science. Take it as a prompt, not a verdict.</p>
+    <p class="disclosure">This is the exploratory, for-fun corner of an exploratory astrology site. The chart math underneath is real (whole sign houses, tropical zodiac, major aspects), but which placements count toward being funny, and how much, is our own read, not a settled science. Take it as a prompt, not a verdict.</p>
   </div>
 </section>
 

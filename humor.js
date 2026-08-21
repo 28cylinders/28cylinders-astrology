@@ -39,6 +39,98 @@ function iconCircle(glyph, colorKey, size, extraClass){
 // (Sagittarius) this page needs that content.js doesn't otherwise cover.
 const GLYPHS = { sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂', jupiter: '♃', uranus: '♅', sagittarius: '♐' };
 
+// ── CHART WHEEL ──────────────────────────────────────────
+// A focused circular chart, not a full professional wheel: the 12 zodiac
+// signs as fixed wedges (Aries always at the 9 o'clock spot, signs running
+// counterclockwise from there, same direction real chart wheels use), the
+// 5th house wedge highlighted when we know it (needs an exact birth time,
+// same rule as the checklist below), and just the five bodies this whole
+// page is actually about: Sun, Mercury, Venus, Jupiter, Uranus. Angles come
+// from the real ecliptic degree the engine already computed, the same
+// numbers chart.js shows as plain text, just drawn instead of printed.
+const ZODIAC_ORDER = ['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces'];
+const ZODIAC_SYMBOLS = { aries:'♈', taurus:'♉', gemini:'♊', cancer:'♋', leo:'♌', virgo:'♍', libra:'♎', scorpio:'♏', sagittarius:'♐', capricorn:'♑', aquarius:'♒', pisces:'♓' };
+const WHEEL_BODIES = ['sun', 'mercury', 'venus', 'jupiter', 'uranus'];
+
+// deg is the absolute ecliptic degree (0-360, Aries = 0). Angle 180 is the
+// 9 o'clock spot; increasing deg sweeps counterclockwise from there, which
+// is the direction a real chart wheel reads in.
+function wheelAngle(deg){ return 180 + deg; }
+function wheelPoint(cx, cy, r, angleDeg){
+  const rad = angleDeg * Math.PI / 180;
+  return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
+}
+function wedgePath(cx, cy, rInner, rOuter, angleStart, angleEnd){
+  const a = wheelPoint(cx, cy, rOuter, angleStart);
+  const b = wheelPoint(cx, cy, rOuter, angleEnd);
+  const c = wheelPoint(cx, cy, rInner, angleEnd);
+  const d = wheelPoint(cx, cy, rInner, angleStart);
+  return `M${a.x.toFixed(2)},${a.y.toFixed(2)} A${rOuter},${rOuter} 0 0,0 ${b.x.toFixed(2)},${b.y.toFixed(2)}
+    L${c.x.toFixed(2)},${c.y.toFixed(2)} A${rInner},${rInner} 0 0,1 ${d.x.toFixed(2)},${d.y.toFixed(2)} Z`;
+}
+
+function buildChartWheel(horoscope, timeKnown){
+  const cx = 170, cy = 170, rOuter = 130, rInner = 98, labelR = 114, badgeR = 148;
+  const fifthHouseSign = timeKnown ? horoscope.Houses.find((h) => h.id === 5).Sign.key : null;
+
+  const wedges = ZODIAC_ORDER.map((sign, i) => {
+    const start = wheelAngle(i * 30), end = wheelAngle(i * 30 + 30);
+    const isFifth = sign === fifthHouseSign;
+    const fill = isFifth ? tint(getSwatch('lime').hex, 0.5) : (i % 2 === 0 ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.02)');
+    const labelAngle = wheelAngle(i * 30 + 15);
+    const lp = wheelPoint(cx, cy, labelR, labelAngle);
+    return `
+      <path d="${wedgePath(cx, cy, rInner, rOuter, start, end)}" fill="${fill}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
+      <text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" class="wheel-sign-label" text-anchor="middle" dominant-baseline="middle">${ZODIAC_SYMBOLS[sign]}</text>
+    `;
+  }).join('');
+
+  // Simple collision spacing: sort the five tracked bodies by their real
+  // degree, then nudge any that land within 16° of the previous one so the
+  // badges don't stack directly on top of each other along the ring.
+  const placed = WHEEL_BODIES
+    .map((key) => ({ key, deg: horoscope.CelestialBodies[key].ChartPosition.Ecliptic.DecimalDegrees }))
+    .sort((a, b) => a.deg - b.deg);
+  let prev = null;
+  placed.forEach((p) => {
+    p.adjusted = p.deg;
+    if(prev !== null){
+      let diff = p.adjusted - prev;
+      if(diff < 0) diff += 360;
+      if(diff < 16) p.adjusted = prev + 16;
+    }
+    prev = p.adjusted;
+  });
+
+  const badges = placed.map(({ key, deg, adjusted }) => {
+    const angle = wheelAngle(adjusted);
+    const ringEdge = wheelPoint(cx, cy, rOuter, wheelAngle(deg));
+    const badgePos = wheelPoint(cx, cy, badgeR, angle);
+    const sw = getSwatch(ASTRO_COLORS.PLANET_COLORS[key]);
+    return `
+      <line x1="${ringEdge.x.toFixed(2)}" y1="${ringEdge.y.toFixed(2)}" x2="${badgePos.x.toFixed(2)}" y2="${badgePos.y.toFixed(2)}" stroke="${sw.cssVar}" stroke-width="1" opacity=".55"/>
+      <circle cx="${badgePos.x.toFixed(2)}" cy="${badgePos.y.toFixed(2)}" r="13" fill="${sw.cssVar}"/>
+      <text x="${badgePos.x.toFixed(2)}" y="${badgePos.y.toFixed(2)}" class="wheel-planet-glyph" text-anchor="middle" dominant-baseline="central" fill="${sw.text}">${GLYPHS[key]}</text>
+    `;
+  }).join('');
+
+  const legendHtml = timeKnown && fifthHouseSign
+    ? `<p class="wheel-caption">The highlighted wedge is your 5th house, in ${signLabel(fifthHouseSign)}. The rest of the ring is just the zodiac, for orientation.</p>`
+    : `<p class="wheel-caption">This is a simplified view of your Sun, Mercury, Venus, Jupiter, and Uranus by sign. Add an exact birth time to also see your 5th house.</p>`;
+
+  return `
+    <div class="wheel-figure">
+      <svg viewBox="0 0 340 340" class="wheel-svg" role="img" aria-label="A simplified circular chart showing the signs of your Sun, Mercury, Venus, Jupiter, and Uranus">
+        ${wedges}
+        <circle cx="${cx}" cy="${cy}" r="${rOuter}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1"/>
+        <circle cx="${cx}" cy="${cy}" r="${rInner}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1"/>
+        ${badges}
+      </svg>
+      ${legendHtml}
+    </div>
+  `;
+}
+
 // ── COMEDY STYLE MODEL ──────────────────────────────────
 // One of 8 buckets per the brief's "comedy styles by sign" list — every
 // sign lands in exactly one. Read twice: off Mercury ("how you're funny")
@@ -54,43 +146,43 @@ const SIGN_TO_STYLE = {
 const COMEDY_STYLES = {
   wordplay: {
     title: 'The Wordplay Wit',
-    mercuryLine: 'Your mind runs on language — puns, callbacks, and rapid-fire back-and-forth are basically a reflex.',
+    mercuryLine: 'Your mind runs on language: puns, callbacks, and rapid-fire back-and-forth are basically a reflex.',
     venusLine: 'You laugh hardest at whoever’s fastest. A good pun lands harder for you than a good story.',
   },
   storyteller: {
     title: 'The Big Storyteller',
-    mercuryLine: 'You build a joke like a story — the exaggeration and the big swing at the end are the whole point.',
+    mercuryLine: 'You build a joke like a story. The exaggeration and the big swing at the end are the whole point.',
     venusLine: 'A wild, over-the-top story gets you every time, especially if it’s mostly true.',
   },
   deadpanAbsurdist: {
     title: 'The Deadpan Absurdist',
     mercuryLine: 'You deliver the strangest thing in the room completely flat, which is exactly why it works.',
-    venusLine: 'Absurd, ironic, slightly off-kilter is your favorite register — pure sincerity bores you a little.',
+    venusLine: 'Absurd, ironic, and slightly off-kilter is your favorite register. Pure sincerity bores you a little.',
   },
   whimsical: {
     title: 'The Whimsical Softie',
-    mercuryLine: 'Self-deprecating, a little silly, occasionally physical — your humor makes people feel safe, not roasted.',
-    venusLine: 'Gentle, whimsical, a little goofy — you’d rather laugh with someone than at them.',
+    mercuryLine: 'Self-deprecating, a little silly, and occasionally physical. Your humor makes people feel safe, not roasted.',
+    venusLine: 'Gentle, whimsical, and a little goofy. You’d rather laugh with someone than at them.',
   },
   darkCutting: {
     title: 'The Dark & Cutting',
-    mercuryLine: 'One sarcastic line, perfectly timed, does more work than a whole bit — you don’t need the volume.',
-    venusLine: 'Dark humor and a cutting one-liner, delivered dead serious — that’s the good stuff to you.',
+    mercuryLine: 'One sarcastic line, perfectly timed, does more work than a whole bit. You don’t need the volume.',
+    venusLine: 'Dark humor and a cutting one-liner, delivered dead serious. That’s the good stuff to you.',
   },
   dryObservational: {
     title: 'The Dry Observationalist',
     mercuryLine: 'You notice the small, specific, slightly ridiculous detail everyone else missed, and say it completely straight-faced.',
-    venusLine: 'Dry, observational, unbothered — you’d rather someone nail a detail than perform a bit.',
+    venusLine: 'Dry, observational, and unbothered. You’d rather someone nail a detail than perform a bit.',
   },
   performative: {
     title: 'The Performer',
-    mercuryLine: 'Big reactions, physical comedy, main-character energy — you’re funniest when there’s an audience.',
-    venusLine: 'You want the full performance — slapstick, drama, a little chaos. Subtlety is for other people.',
+    mercuryLine: 'Big reactions, physical comedy, and main-character energy. You’re funniest when there’s an audience.',
+    venusLine: 'You want the full performance: slapstick, drama, a little chaos. Subtlety is for other people.',
   },
   charmingTease: {
     title: 'The Charming Tease',
-    mercuryLine: 'Warm, social, a little flirty — your humor is built to include people, not single them out.',
-    venusLine: 'A little teasing, a little charm — you find warmth funnier than an edge.',
+    mercuryLine: 'Warm, social, and a little flirty. Your humor is built to include people, not single them out.',
+    venusLine: 'A little teasing, a little charm. You find warmth funnier than an edge.',
   },
 };
 
@@ -106,32 +198,32 @@ const MODIFIERS = [
   {
     id: 'air-mercury', label: 'Quick Wit', weight: 15, icon: { glyph: GLYPHS.mercury, colorKey: 'sky' },
     check: (ctx) => AIR_SIGNS.includes(ctx.mercurySign),
-    hit: (ctx) => `Mercury in ${signLabel(ctx.mercurySign)} — an air sign, so your mind runs in quick, verbal loops built for fast wit.`,
-    miss: (ctx) => `Mercury in ${signLabel(ctx.mercurySign)} — your wit leans more instinctive than rapid-fire verbal.`,
+    hit: (ctx) => `Mercury in ${signLabel(ctx.mercurySign)} is an air sign, so your mind runs in quick, verbal loops built for fast wit.`,
+    miss: (ctx) => `Mercury in ${signLabel(ctx.mercurySign)} tends to be more instinctive than rapid-fire verbal, which is its own kind of quick.`,
   },
   {
     id: 'mercury-uranus', label: 'Unpredictable Streak', weight: 12, icon: { glyph: GLYPHS.uranus, colorKey: 'cobalt' },
     check: (ctx) => !!ctx.mercuryUranus,
-    hit: (ctx) => `Mercury ${ctx.mercuryUranus.label} Uranus — you go somewhere nobody saw coming. Absurdist, left-field, occasionally chaotic, on purpose.`,
-    miss: () => 'No major Mercury–Uranus connection — your jokes tend to make sense in a straight line, for better or worse.',
+    hit: (ctx) => `Mercury ${ctx.mercuryUranus.label} Uranus, so you go somewhere nobody saw coming: absurdist, left-field, occasionally chaotic, on purpose.`,
+    miss: () => 'No major connection between Mercury and Uranus, so your jokes tend to follow a straight line, which has its own reliability.',
   },
   {
     id: 'mercury-jupiter', label: 'Big Punchline Energy', weight: 12, icon: { glyph: GLYPHS.jupiter, colorKey: 'purple' },
     check: (ctx) => !!ctx.mercuryJupiter,
-    hit: (ctx) => `Mercury ${ctx.mercuryJupiter.label} Jupiter — you can’t tell a story small. Exaggeration is a feature, not a bug.`,
-    miss: () => 'No major Mercury–Jupiter connection — you’re probably not the one turning a story into a saga.',
+    hit: (ctx) => `Mercury ${ctx.mercuryJupiter.label} Jupiter, so you can’t tell a story small. Exaggeration is a feature, not a bug.`,
+    miss: () => 'No major connection between Mercury and Jupiter, so you’re probably not the one turning a story into a saga, and that keeps things tight.',
   },
   {
     id: 'venus-mars', label: 'Flirty Banter', weight: 10, icon: { glyph: GLYPHS.venus, colorKey: 'pink' },
     check: (ctx) => !!ctx.venusMars,
-    hit: (ctx) => `Venus ${ctx.venusMars.label} Mars — your teasing has an edge of flirtation, on purpose or not.`,
-    miss: () => 'No major Venus–Mars connection — your humor and your flirting run on separate tracks.',
+    hit: (ctx) => `Venus ${ctx.venusMars.label} Mars, so your teasing carries an edge of flirtation, on purpose or not.`,
+    miss: () => 'No major connection between Venus and Mars, so your humor and your flirting tend to run on separate tracks.',
   },
   {
     id: 'fifth-house', label: 'Natural Performer', weight: 12, needsTime: true, icon: { house: 5, colorKey: 'lime' },
     check: (ctx) => ctx.timeKnown && ctx.fifthHousePlanets.length > 0,
-    hit: (ctx) => `${ctx.fifthHousePlanets.length} planet${ctx.fifthHousePlanets.length > 1 ? 's' : ''} in your 5th house — the house of play — so comedic timing comes naturally, not from trying.`,
-    miss: () => 'No planets currently sitting in your 5th house — you can still be funny, it’s just not a built-in specialty here.',
+    hit: (ctx) => `${ctx.fifthHousePlanets.length} planet${ctx.fifthHousePlanets.length > 1 ? 's' : ''} in your 5th house, the house of play, so comedic timing comes naturally rather than from trying.`,
+    miss: () => 'No planets currently sitting in your 5th house. That just means comedic timing isn’t a built-in specialty here, not that you aren’t funny.',
     needsTimeText: 'Add an exact birth time to see whether your 5th house is loaded.',
   },
   {
@@ -140,9 +232,9 @@ const MODIFIERS = [
     hit: (ctx) => {
       const both = ctx.sunSign === 'leo' && ctx.mercurySign === 'leo';
       const which = both ? 'Sun and Mercury' : (ctx.sunSign === 'leo' ? 'Sun' : 'Mercury');
-      return `${which} in Leo — there’s a theatrical, main-character quality to how your humor lands.`;
+      return `${which} in Leo, which gives your humor a theatrical, main-character quality.`;
     },
-    miss: () => 'Neither your Sun nor Mercury is in Leo — your humor doesn’t need the spotlight to land.',
+    miss: () => 'Neither your Sun nor Mercury is in Leo, so your humor doesn’t need the spotlight to land.',
   },
   {
     id: 'sagittarius-blunt', label: 'Too Real', weight: 10, icon: { glyph: GLYPHS.sagittarius, colorKey: 'amber' },
@@ -150,9 +242,9 @@ const MODIFIERS = [
     hit: (ctx) => {
       const names = { sunSign: 'Sun', mercurySign: 'Mercury', jupiterSign: 'Jupiter' };
       const which = ['sunSign', 'mercurySign', 'jupiterSign'].filter((k) => ctx[k] === 'sagittarius').map((k) => names[k]);
-      return `${which.join(' and ')} in Sagittarius — blunt, philosophical, occasionally "that’s a little too real" funny.`;
+      return `${which.join(' and ')} in Sagittarius: blunt, philosophical, and occasionally "that’s a little too real" funny.`;
     },
-    miss: () => 'No Sagittarius placements among Sun, Mercury, or Jupiter — you’re probably a little more careful with the truth than that.',
+    miss: () => 'No Sagittarius placements among Sun, Mercury, or Jupiter, so you’re probably a little more careful with the truth than that.',
   },
 ];
 
@@ -160,8 +252,8 @@ const BASE_SCORE = 25;
 
 const SCORE_TIERS = [
   { max: 34, title: 'Quietly Funny', colorKey: 'teal', desc: 'Your humor is real, it’s just not loud about it. Right audience, right moment, and you’re the funniest person in the room.' },
-  { max: 54, title: 'Reliably Funny', colorKey: 'sky', desc: 'You’re not performing, but you’re consistently, dependably funny — the kind of funny that shows up in a group chat, not on a stage.' },
-  { max: 74, title: 'Certified Funny', colorKey: 'lime', desc: 'Multiple parts of your chart are pulling in the same direction here — this is a real, load-bearing part of your personality.' },
+  { max: 54, title: 'Reliably Funny', colorKey: 'sky', desc: 'You’re not performing, but you’re consistently, dependably funny: the kind of funny that shows up in a group chat, not on a stage.' },
+  { max: 74, title: 'Certified Funny', colorKey: 'lime', desc: 'Multiple parts of your chart are pulling in the same direction here, and that’s a real, load-bearing part of your personality.' },
   { max: 89, title: 'Dangerously Funny', colorKey: 'amber', desc: 'A lot of your chart is wired for comedy. You already know this about yourself.' },
   { max: 100, title: 'Unhinged Comedic Genius', colorKey: 'fuchsia', desc: 'Nearly every comedic signature in the book showed up in your chart. This was never really in question.' },
 ];
@@ -188,9 +280,7 @@ const formError = document.getElementById('formError');
 const calcLoading = document.getElementById('calcLoading');
 const results = document.getElementById('results');
 const resultsNote = document.getElementById('resultsNote');
-const styleGrid = document.getElementById('styleGrid');
-const scoreBlock = document.getElementById('scoreBlock');
-const modifierList = document.getElementById('modifierList');
+const resultsBody = document.getElementById('resultsBody');
 const restoreBanner = document.getElementById('restoreBanner');
 const clearSavedChartBtn = document.getElementById('clearSavedChart');
 
@@ -229,7 +319,7 @@ function closeDropdown(){ placeResults.classList.remove('open'); }
 function renderPlaceOptions(matches){
   placeResults.innerHTML = '';
   if(!matches.length){
-    placeStatus.textContent = 'No matches found — try adding a country or being more specific.';
+    placeStatus.textContent = 'No matches found. Try adding a country or being more specific.';
     closeDropdown();
     return;
   }
@@ -248,7 +338,7 @@ function renderPlaceOptions(matches){
     });
     placeResults.appendChild(btn);
   });
-  placeStatus.textContent = `${matches.length} match${matches.length > 1 ? 'es' : ''} — pick the right one:`;
+  placeStatus.textContent = `${matches.length} match${matches.length > 1 ? 'es' : ''}, pick the right one:`;
   openDropdown();
 }
 
@@ -388,11 +478,16 @@ function restoreLastChart(){
 }
 
 // ── RENDERING ──
+// The whole results section reads like one short post: a dateline, the
+// chart wheel as a figure, two written sections (how you're funny, off
+// Mercury; what you find funny, off Venus), then the score, explained in
+// prose rather than a checklist of cards — same underlying MODIFIERS data
+// as before, just read out loud instead of listed.
 function renderResults({ origin, horoscope, timeKnown, scrollTo = true }){
   results.classList.add('visible');
 
-  resultsNote.innerHTML = `<strong>${selectedPlace.display_name}</strong> · local time used: ${origin.localTimeFormatted}
-    ${timeKnown ? '' : ' (solar noon, exact time unknown)'} · read for fun, not a diagnosis`;
+  resultsNote.textContent = `${selectedPlace.display_name}, using ${origin.localTimeFormatted}`
+    + (timeKnown ? '' : ' (solar noon, since the exact time isn’t known)') + '. Read for fun, not a diagnosis.';
 
   const mercurySign = horoscope.CelestialBodies.mercury.Sign.key;
   const venusSign = horoscope.CelestialBodies.venus.Sign.key;
@@ -410,30 +505,14 @@ function renderResults({ origin, horoscope, timeKnown, scrollTo = true }){
     venusMars: findAspect(horoscope.Aspects.all, 'venus', 'mars'),
   };
 
-  // ── style cards (Mercury = how you're funny, Venus = what tickles you) ──
+  // Mercury = how you're funny, Venus = what you find funny.
   const mercuryStyle = COMEDY_STYLES[SIGN_TO_STYLE[mercurySign]];
   const venusStyle = COMEDY_STYLES[SIGN_TO_STYLE[venusSign]];
-  const mercurySwatch = getSwatch(ASTRO_COLORS.COMEDY_STYLE_COLORS[SIGN_TO_STYLE[mercurySign]]);
-  const venusSwatch = getSwatch(ASTRO_COLORS.COMEDY_STYLE_COLORS[SIGN_TO_STYLE[venusSign]]);
+  const mercuryColorKey = ASTRO_COLORS.COMEDY_STYLE_COLORS[SIGN_TO_STYLE[mercurySign]];
+  const venusColorKey = ASTRO_COLORS.COMEDY_STYLE_COLORS[SIGN_TO_STYLE[venusSign]];
 
-  styleGrid.innerHTML = `
-    <div class="style-card reveal" style="background:linear-gradient(160deg, ${tint(mercurySwatch.hex, 0.22)}, #fff 60%)">
-      ${iconCircle(GLYPHS.mercury, ASTRO_COLORS.COMEDY_STYLE_COLORS[SIGN_TO_STYLE[mercurySign]], 54, 'style-card-icon')}
-      <div class="style-card-label">Your comedic style</div>
-      <div class="style-card-title">${mercuryStyle.title}</div>
-      <p class="style-card-line">${mercuryStyle.mercuryLine}</p>
-      <p class="style-card-note">Mercury in ${signLabel(mercurySign)}</p>
-    </div>
-    <div class="style-card reveal" style="background:linear-gradient(160deg, ${tint(venusSwatch.hex, 0.22)}, #fff 60%)">
-      ${iconCircle(GLYPHS.venus, ASTRO_COLORS.COMEDY_STYLE_COLORS[SIGN_TO_STYLE[venusSign]], 54, 'style-card-icon')}
-      <div class="style-card-label">What tickles you</div>
-      <div class="style-card-title">${venusStyle.title}</div>
-      <p class="style-card-line">${venusStyle.venusLine}</p>
-      <p class="style-card-note">Venus in ${signLabel(venusSign)}</p>
-    </div>
-  `;
-
-  // ── scored checklist ──
+  // ── the score, still a real weighted total (see MODIFIERS above), just
+  // explained in sentences below instead of a card grid. ──
   let score = BASE_SCORE, maxScore = BASE_SCORE;
   const rows = MODIFIERS.map((mod) => {
     const checkable = !mod.needsTime || ctx.timeKnown;
@@ -453,49 +532,71 @@ function renderResults({ origin, horoscope, timeKnown, scrollTo = true }){
   const RADIUS = 52, CIRCUMFERENCE = 2 * Math.PI * RADIUS;
   const targetOffset = CIRCUMFERENCE - (pct / 100) * CIRCUMFERENCE;
 
-  scoreBlock.innerHTML = `
-    <div class="score-ring-wrap">
-      <svg viewBox="0 0 120 120">
-        <circle class="score-ring-bg" cx="60" cy="60" r="${RADIUS}"/>
-        <circle class="score-ring-fill" id="scoreRingFill" cx="60" cy="60" r="${RADIUS}" stroke="${tierSwatch.cssVar}"
-          stroke-dasharray="${CIRCUMFERENCE.toFixed(2)}" stroke-dashoffset="${CIRCUMFERENCE.toFixed(2)}" transform="rotate(-90 60 60)"/>
-      </svg>
-      <div class="score-ring-center">
-        <div class="score-number">${pct}</div>
-        <div class="score-tier" style="color:${tierSwatch.cssVar}">${tier.title}</div>
+  const hits = rows.filter((r) => r.checkable && r.isHit);
+  const misses = rows.filter((r) => r.checkable && !r.isHit);
+  const pending = rows.filter((r) => !r.checkable);
+
+  // hits and misses are both stated as plain facts about the chart, not
+  // as points scored or lost, on purpose: the goal is an explained number,
+  // not a lecture about what's missing.
+  const hitsParagraph = hits.length
+    ? `<p>Here’s what’s pulling this number up: ${hits.map(({ mod }) => mod.hit(ctx)).join(' ')}</p>` : '';
+  const missesParagraph = misses.length
+    ? `<p>And here’s what isn’t showing up in this particular chart, which is information, not a verdict: ${misses.map(({ mod }) => mod.miss(ctx)).join(' ')}</p>` : '';
+  const pendingParagraph = pending.length
+    ? `<p class="score-footnote">${pending.map((r) => r.mod.needsTimeText).join(' ')}</p>` : '';
+
+  resultsBody.innerHTML = `
+    ${buildChartWheel(horoscope, timeKnown)}
+
+    <p class="section-label">How you’re funny</p>
+    <div class="prose-block reveal">
+      ${iconCircle(GLYPHS.mercury, mercuryColorKey, 40, 'prose-icon')}
+      <div>
+        <p class="prose-lead">${mercuryStyle.title}, from Mercury in ${signLabel(mercurySign)}.</p>
+        <p>${mercuryStyle.mercuryLine}</p>
       </div>
     </div>
-    <p class="score-tier-desc">${tier.desc}</p>
-    ${rows.some((r) => !r.checkable) ? '<p class="score-footnote">Score is out of what could actually be checked — add an exact birth time for the full picture.</p>' : ''}
+
+    <p class="section-label">What you find funny</p>
+    <div class="prose-block reveal">
+      ${iconCircle(GLYPHS.venus, venusColorKey, 40, 'prose-icon')}
+      <div>
+        <p class="prose-lead">${venusStyle.title}, from Venus in ${signLabel(venusSign)}.</p>
+        <p>${venusStyle.venusLine}</p>
+      </div>
+    </div>
+
+    <p class="section-label">Humor score</p>
+    <div class="score-block reveal">
+      <div class="score-ring-wrap">
+        <svg viewBox="0 0 120 120">
+          <circle class="score-ring-bg" cx="60" cy="60" r="${RADIUS}"/>
+          <circle class="score-ring-fill" id="scoreRingFill" cx="60" cy="60" r="${RADIUS}" stroke="${tierSwatch.cssVar}"
+            stroke-dasharray="${CIRCUMFERENCE.toFixed(2)}" stroke-dashoffset="${CIRCUMFERENCE.toFixed(2)}" transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="score-ring-center">
+          <div class="score-number">${pct}</div>
+          <div class="score-tier" style="color:${tierSwatch.cssVar}">${tier.title}</div>
+        </div>
+      </div>
+      <p class="score-tier-desc">${tier.desc}</p>
+    </div>
+    <div class="reveal">
+      ${hitsParagraph}
+      ${missesParagraph}
+      ${pendingParagraph}
+    </div>
+
+    <p class="chart-link-row"><a class="btn-calc-secondary" href="chart.html">See your full birth chart →</a></p>
   `;
+
   const ringFill = document.getElementById('scoreRingFill');
   if(ringFill){
     requestAnimationFrame(() => requestAnimationFrame(() => {
       ringFill.style.strokeDashoffset = targetOffset.toFixed(2);
     }));
   }
-
-  modifierList.innerHTML = rows.map(({ mod, checkable, isHit }) => {
-    const state = !checkable ? 'pending' : (isHit ? 'hit' : 'miss');
-    const text = state === 'pending' ? mod.needsTimeText : (isHit ? mod.hit(ctx) : mod.miss(ctx));
-    // pending rows get the dashed-outline treatment from .modifier-row.pending
-    // .modifier-icon in CSS regardless of what's passed here, so an empty
-    // circle is fine — the glyph would just be hidden by that override.
-    const icon = state === 'pending'
-      ? `<div class="icon-circle modifier-icon" style="width:36px;height:36px"></div>`
-      : mod.icon.house
-        ? `<div class="icon-circle modifier-icon" style="width:36px;height:36px;background:${getSwatch(mod.icon.colorKey).cssVar}">${ASTRO_CONTENT.houseIcon(mod.icon.house, getSwatch(mod.icon.colorKey).text, 20)}</div>`
-        : iconCircle(mod.icon.glyph, mod.icon.colorKey, 36, 'modifier-icon');
-    return `
-      <div class="modifier-row ${state} reveal">
-        ${icon}
-        <div>
-          <div class="modifier-label">${mod.label}${!checkable ? ' <span class="modifier-pending-tag">Needs birth time</span>' : ''}</div>
-          <p class="modifier-text">${text}</p>
-        </div>
-      </div>
-    `;
-  }).join('');
 
   if(scrollTo){ try { results.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e){} }
   observeReveals();
