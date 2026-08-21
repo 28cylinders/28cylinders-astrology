@@ -23,36 +23,67 @@
   margin:40px 0 14px;text-align:center;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
 .section-label:first-of-type{margin-top:0;padding-top:0;border-top:none}
 
+/* ── "reading the sky" spinner — a brief bit of theater between hitting
+   Calculate and the reveal, instead of results just snapping into place.
+   The ring is a conic-gradient sweep through the palette, masked into a
+   ring with radial-gradient rather than an svg, so it's pure CSS. ── */
+.calc-loading{display:none;text-align:center;padding:46px 0 18px}
+.calc-loading.visible{display:block}
+.calc-spinner{width:68px;height:68px;border-radius:50%;margin:0 auto 18px;
+  background:conic-gradient(from 0deg, var(--sky), var(--pink), var(--purple), var(--yellow), var(--teal), var(--sky));
+  animation:calc-spin .9s linear infinite;
+  -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
+  mask:radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
+}
+@keyframes calc-spin{to{transform:rotate(360deg)}}
+.calc-loading-text{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+@media (prefers-reduced-motion: reduce){ .calc-spinner{animation:none} }
+
 /* ── two style cards: Mercury ("how you're funny") + Venus ("what
-   tickles you") — same white-card language as hl-card/placement-row
-   elsewhere, just roomier since there's a full sentence to hold. ── */
+   tickles you") — a big colored planet-glyph badge plus a soft wash of
+   that style's color behind it, so each card reads as one saturated
+   hue rather than a white card with a thin colored line at the top. ── */
+/* shared filled-circle glyph badge — the style-card header icon and the
+   modifier-row icon are the same shape at two sizes, set inline (each
+   card's color is data-driven, not knowable in CSS ahead of time). */
+.icon-circle{display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;box-shadow:0 4px 10px rgba(0,0,0,.28)}
+
 .style-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.style-card{background:var(--white);color:var(--ink-1);border-radius:2px;padding:22px 20px;box-shadow:0 8px 18px rgba(0,0,0,.35);
+.style-card{color:var(--ink-1);border-radius:8px;padding:24px 22px;
   transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease}
-.style-card:hover{transform:translateY(-4px);box-shadow:0 16px 28px rgba(0,0,0,.45)}
-.style-card-label{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:12px}
-.style-card-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;line-height:1.15;margin-bottom:10px;color:var(--ink-1)}
+.style-card:hover{transform:translateY(-4px) scale(1.015)}
+.style-card-icon{margin-bottom:16px}
+.style-card-label{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px}
+.style-card-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;line-height:1.15;margin-bottom:10px;color:var(--ink-1)}
 .style-card-line{font-family:'Space Mono',monospace;font-size:13px;line-height:1.65;color:var(--ink-1);opacity:.85;margin-bottom:12px}
 .style-card-note{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
 
-/* ── score meter — the one big number on the page ── */
+/* ── score meter — an actual progress ring, not a plain bar. Drawn at
+   full stroke-dashoffset (empty) then animated to its real value once
+   inserted, so the ring visibly fills in on reveal. ── */
 .score-block{text-align:center;max-width:520px;margin:0 auto}
-.score-number{font-family:'Playfair Display',serif;font-size:clamp(52px,10vw,84px);font-weight:600;line-height:1;color:var(--white)}
-.score-tier{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white);opacity:.85;margin-top:2px}
-.score-bar-track{margin:20px auto 18px;max-width:360px;height:8px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden}
-.score-bar-fill{height:100%;border-radius:999px;background:var(--pink);transition:width .6s cubic-bezier(.34,1.2,.4,1)}
-.score-tier-desc{font-family:'Space Mono',monospace;font-size:13px;line-height:1.75;opacity:.85;padding:0 12px}
+.score-ring-wrap{position:relative;width:190px;height:190px;margin:0 auto 4px}
+.score-ring-wrap svg{width:100%;height:100%;display:block}
+.score-ring-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:10}
+.score-ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1)}
+.score-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px;text-align:center}
+.score-number{font-family:'Playfair Display',serif;font-size:46px;font-weight:600;line-height:1;color:var(--white)}
+.score-tier{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-top:6px}
+.score-tier-desc{font-family:'Space Mono',monospace;font-size:13px;line-height:1.75;opacity:.85;padding:0 12px;margin-top:10px}
 .score-footnote{font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.6;opacity:.55;margin-top:14px;padding:0 12px}
+@media (prefers-reduced-motion: reduce){ .score-ring-fill{transition:none} }
 
-/* ── scored checklist ── */
+/* ── scored checklist — each row gets the actual planet/house glyph
+   for the placement it's checking, in that placement's real color
+   (same PLANET_COLORS the rest of the site uses), full-color on a hit
+   and desaturated on a miss, rather than a generic check/dash. ── */
 .modifier-list{display:flex;flex-direction:column;gap:10px;max-width:640px;margin:0 auto}
-.modifier-row{background:var(--white);color:var(--ink-1);border-radius:2px;padding:14px 16px;box-shadow:0 4px 10px rgba(0,0,0,.25);
-  display:flex;gap:12px;align-items:flex-start;text-align:left}
-.modifier-status{flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:700;margin-top:1px}
-.modifier-row.hit .modifier-status{background:var(--teal);color:#fff}
-.modifier-row.miss .modifier-status{background:#e5e5e5;color:var(--ink-3)}
-.modifier-row.pending .modifier-status{background:transparent;border:1.5px dashed var(--ink-3);color:var(--ink-3)}
+.modifier-row{background:var(--white);color:var(--ink-1);border-radius:8px;padding:14px 16px;box-shadow:0 4px 10px rgba(0,0,0,.25);
+  display:flex;gap:14px;align-items:flex-start;text-align:left;transition:opacity .2s}
+.modifier-row.miss{opacity:.62}
+.modifier-icon{flex-shrink:0;margin-top:1px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.modifier-row.miss .modifier-icon{filter:grayscale(1)}
+.modifier-row.pending .modifier-icon{background:transparent!important;border:1.5px dashed var(--ink-3);color:var(--ink-3);box-shadow:none}
 .modifier-label{font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;letter-spacing:.03em;color:var(--ink-1);margin-bottom:4px}
 .modifier-pending-tag{font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:9.5px;color:var(--ink-3);border:1px solid rgba(0,0,0,.2);border-radius:999px;padding:2px 7px;margin-left:6px}
 .modifier-text{font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.6;color:var(--ink-2)}
@@ -114,6 +145,11 @@
     <button type="submit" class="btn-calc" id="calcBtn" disabled>Calculate my humor</button>
     <p class="form-error" id="formError" style="display:none" role="alert"></p>
   </form>
+
+  <div class="calc-loading" id="calcLoading" aria-live="polite">
+    <div class="calc-spinner"></div>
+    <p class="calc-loading-text">Reading the sky…</p>
+  </div>
 
   <div class="results" id="results" aria-live="polite">
     <p class="results-note" id="resultsNote"></p>

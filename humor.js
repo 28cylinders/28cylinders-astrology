@@ -20,6 +20,25 @@ function getSwatch(key){ return ASTRO_COLORS.swatch(key); }
 function badge(key, size){ return ASTRO_CONTENT.symbolBadge(key, size); }
 function signLabel(key){ return key ? key.charAt(0).toUpperCase() + key.slice(1) : ''; }
 
+// a soft color wash for card backgrounds — same hex the swatch already
+// carries, just diluted, so "this card is teal" and "this card's
+// background is a wash of that same teal" are never two different colors.
+function tint(hex, alpha){
+  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+// a filled circle carrying one glyph, sized/colored for the big style-card
+// header or the smaller modifier-row icon — the one piece of markup both
+// reuse, so "planet badge" always means the same shape at two sizes.
+function iconCircle(glyph, colorKey, size, extraClass){
+  const sw = getSwatch(colorKey);
+  return `<div class="icon-circle ${extraClass || ''}" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.5)}px;background:${sw.cssVar};color:${sw.text}">${glyph}</div>`;
+}
+// standard astrological glyphs — same set content.js already uses for
+// planets, plus the one house glyph (5th) and the one zodiac glyph
+// (Sagittarius) this page needs that content.js doesn't otherwise cover.
+const GLYPHS = { sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂', jupiter: '♃', uranus: '♅', sagittarius: '♐' };
+
 // ── COMEDY STYLE MODEL ──────────────────────────────────
 // One of 8 buckets per the brief's "comedy styles by sign" list — every
 // sign lands in exactly one. Read twice: off Mercury ("how you're funny")
@@ -85,38 +104,38 @@ const AIR_SIGNS = ['gemini', 'libra', 'aquarius'];
 // silently scored as a miss when there's no reliable house data yet).
 const MODIFIERS = [
   {
-    id: 'air-mercury', label: 'Quick Wit', weight: 15,
+    id: 'air-mercury', label: 'Quick Wit', weight: 15, icon: { glyph: GLYPHS.mercury, colorKey: 'sky' },
     check: (ctx) => AIR_SIGNS.includes(ctx.mercurySign),
     hit: (ctx) => `Mercury in ${signLabel(ctx.mercurySign)} — an air sign, so your mind runs in quick, verbal loops built for fast wit.`,
     miss: (ctx) => `Mercury in ${signLabel(ctx.mercurySign)} — your wit leans more instinctive than rapid-fire verbal.`,
   },
   {
-    id: 'mercury-uranus', label: 'Unpredictable Streak', weight: 12,
+    id: 'mercury-uranus', label: 'Unpredictable Streak', weight: 12, icon: { glyph: GLYPHS.uranus, colorKey: 'cobalt' },
     check: (ctx) => !!ctx.mercuryUranus,
     hit: (ctx) => `Mercury ${ctx.mercuryUranus.label} Uranus — you go somewhere nobody saw coming. Absurdist, left-field, occasionally chaotic, on purpose.`,
     miss: () => 'No major Mercury–Uranus connection — your jokes tend to make sense in a straight line, for better or worse.',
   },
   {
-    id: 'mercury-jupiter', label: 'Big Punchline Energy', weight: 12,
+    id: 'mercury-jupiter', label: 'Big Punchline Energy', weight: 12, icon: { glyph: GLYPHS.jupiter, colorKey: 'purple' },
     check: (ctx) => !!ctx.mercuryJupiter,
     hit: (ctx) => `Mercury ${ctx.mercuryJupiter.label} Jupiter — you can’t tell a story small. Exaggeration is a feature, not a bug.`,
     miss: () => 'No major Mercury–Jupiter connection — you’re probably not the one turning a story into a saga.',
   },
   {
-    id: 'venus-mars', label: 'Flirty Banter', weight: 10,
+    id: 'venus-mars', label: 'Flirty Banter', weight: 10, icon: { glyph: GLYPHS.venus, colorKey: 'pink' },
     check: (ctx) => !!ctx.venusMars,
     hit: (ctx) => `Venus ${ctx.venusMars.label} Mars — your teasing has an edge of flirtation, on purpose or not.`,
     miss: () => 'No major Venus–Mars connection — your humor and your flirting run on separate tracks.',
   },
   {
-    id: 'fifth-house', label: 'Natural Performer', weight: 12, needsTime: true,
+    id: 'fifth-house', label: 'Natural Performer', weight: 12, needsTime: true, icon: { house: 5, colorKey: 'lime' },
     check: (ctx) => ctx.timeKnown && ctx.fifthHousePlanets.length > 0,
     hit: (ctx) => `${ctx.fifthHousePlanets.length} planet${ctx.fifthHousePlanets.length > 1 ? 's' : ''} in your 5th house — the house of play — so comedic timing comes naturally, not from trying.`,
     miss: () => 'No planets currently sitting in your 5th house — you can still be funny, it’s just not a built-in specialty here.',
     needsTimeText: 'Add an exact birth time to see whether your 5th house is loaded.',
   },
   {
-    id: 'leo-energy', label: 'Main Character Energy', weight: 10,
+    id: 'leo-energy', label: 'Main Character Energy', weight: 10, icon: { glyph: GLYPHS.sun, colorKey: 'yellow' },
     check: (ctx) => ctx.sunSign === 'leo' || ctx.mercurySign === 'leo',
     hit: (ctx) => {
       const both = ctx.sunSign === 'leo' && ctx.mercurySign === 'leo';
@@ -126,7 +145,7 @@ const MODIFIERS = [
     miss: () => 'Neither your Sun nor Mercury is in Leo — your humor doesn’t need the spotlight to land.',
   },
   {
-    id: 'sagittarius-blunt', label: 'Too Real', weight: 10,
+    id: 'sagittarius-blunt', label: 'Too Real', weight: 10, icon: { glyph: GLYPHS.sagittarius, colorKey: 'amber' },
     check: (ctx) => ['sunSign', 'mercurySign', 'jupiterSign'].some((k) => ctx[k] === 'sagittarius'),
     hit: (ctx) => {
       const names = { sunSign: 'Sun', mercurySign: 'Mercury', jupiterSign: 'Jupiter' };
@@ -140,11 +159,11 @@ const MODIFIERS = [
 const BASE_SCORE = 25;
 
 const SCORE_TIERS = [
-  { max: 34, title: 'Quietly Funny', desc: 'Your humor is real, it’s just not loud about it. Right audience, right moment, and you’re the funniest person in the room.' },
-  { max: 54, title: 'Reliably Funny', desc: 'You’re not performing, but you’re consistently, dependably funny — the kind of funny that shows up in a group chat, not on a stage.' },
-  { max: 74, title: 'Certified Funny', desc: 'Multiple parts of your chart are pulling in the same direction here — this is a real, load-bearing part of your personality.' },
-  { max: 89, title: 'Dangerously Funny', desc: 'A lot of your chart is wired for comedy. You already know this about yourself.' },
-  { max: 100, title: 'Unhinged Comedic Genius', desc: 'Nearly every comedic signature in the book showed up in your chart. This was never really in question.' },
+  { max: 34, title: 'Quietly Funny', colorKey: 'teal', desc: 'Your humor is real, it’s just not loud about it. Right audience, right moment, and you’re the funniest person in the room.' },
+  { max: 54, title: 'Reliably Funny', colorKey: 'sky', desc: 'You’re not performing, but you’re consistently, dependably funny — the kind of funny that shows up in a group chat, not on a stage.' },
+  { max: 74, title: 'Certified Funny', colorKey: 'lime', desc: 'Multiple parts of your chart are pulling in the same direction here — this is a real, load-bearing part of your personality.' },
+  { max: 89, title: 'Dangerously Funny', colorKey: 'amber', desc: 'A lot of your chart is wired for comedy. You already know this about yourself.' },
+  { max: 100, title: 'Unhinged Comedic Genius', colorKey: 'fuchsia', desc: 'Nearly every comedic signature in the book showed up in your chart. This was never really in question.' },
 ];
 function tierFor(pct){ return SCORE_TIERS.find((t) => pct <= t.max); }
 
@@ -166,6 +185,7 @@ const placeStatus = document.getElementById('placeStatus');
 const calcBtn = document.getElementById('calcBtn');
 const form = document.getElementById('humorForm');
 const formError = document.getElementById('formError');
+const calcLoading = document.getElementById('calcLoading');
 const results = document.getElementById('results');
 const resultsNote = document.getElementById('resultsNote');
 const styleGrid = document.getElementById('styleGrid');
@@ -326,13 +346,28 @@ form.addEventListener('submit', (e) => {
   }
 
   const payload = { dateValue: birthDate.value, timeKnown, timeValue: birthTime.value, place: selectedPlace };
-  try {
-    calculateAndRender(payload);
-    saveChartToDevice(payload);
-  } catch(err){
-    formError.textContent = 'Something went wrong calculating this: ' + err.message;
-    formError.style.display = 'block';
-  }
+
+  // a brief "reading the sky" spin before the reveal — purely for
+  // delight on an explicit Calculate click, skipped when the chart is
+  // just being restored from a saved visit (see restoreLastChart) and
+  // skipped instantly for reduced-motion, since it's decoration, not
+  // information. Real work (calculateAndRender) still happens exactly
+  // the same either way, just after this pause.
+  results.classList.remove('visible');
+  calcBtn.disabled = true;
+  const spinDelay = prefersReducedMotion ? 0 : 900;
+  if(spinDelay) calcLoading.classList.add('visible');
+  setTimeout(() => {
+    calcLoading.classList.remove('visible');
+    try {
+      calculateAndRender(payload);
+      saveChartToDevice(payload);
+    } catch(err){
+      formError.textContent = 'Something went wrong calculating this: ' + err.message;
+      formError.style.display = 'block';
+    }
+    updateCalcBtnState();
+  }, spinDelay);
 });
 
 function restoreLastChart(){
@@ -382,14 +417,16 @@ function renderResults({ origin, horoscope, timeKnown, scrollTo = true }){
   const venusSwatch = getSwatch(ASTRO_COLORS.COMEDY_STYLE_COLORS[SIGN_TO_STYLE[venusSign]]);
 
   styleGrid.innerHTML = `
-    <div class="style-card reveal" style="border-top:4px solid ${mercurySwatch.cssVar}">
-      <div class="style-card-label">${badge('mercury')}Your comedic style</div>
+    <div class="style-card reveal" style="background:linear-gradient(160deg, ${tint(mercurySwatch.hex, 0.22)}, #fff 60%)">
+      ${iconCircle(GLYPHS.mercury, ASTRO_COLORS.COMEDY_STYLE_COLORS[SIGN_TO_STYLE[mercurySign]], 54, 'style-card-icon')}
+      <div class="style-card-label">Your comedic style</div>
       <div class="style-card-title">${mercuryStyle.title}</div>
       <p class="style-card-line">${mercuryStyle.mercuryLine}</p>
       <p class="style-card-note">Mercury in ${signLabel(mercurySign)}</p>
     </div>
-    <div class="style-card reveal" style="border-top:4px solid ${venusSwatch.cssVar}">
-      <div class="style-card-label">${badge('venus')}What tickles you</div>
+    <div class="style-card reveal" style="background:linear-gradient(160deg, ${tint(venusSwatch.hex, 0.22)}, #fff 60%)">
+      ${iconCircle(GLYPHS.venus, ASTRO_COLORS.COMEDY_STYLE_COLORS[SIGN_TO_STYLE[venusSign]], 54, 'style-card-icon')}
+      <div class="style-card-label">What tickles you</div>
       <div class="style-card-title">${venusStyle.title}</div>
       <p class="style-card-line">${venusStyle.venusLine}</p>
       <p class="style-card-note">Venus in ${signLabel(venusSign)}</p>
@@ -407,22 +444,51 @@ function renderResults({ origin, horoscope, timeKnown, scrollTo = true }){
   });
   const pct = Math.round(Math.min(100, (score / maxScore) * 100));
   const tier = tierFor(pct);
+  const tierSwatch = getSwatch(tier.colorKey);
+
+  // an actual progress ring: drawn fully empty (dashoffset = full
+  // circumference), then nudged to its real value one frame later so
+  // the CSS transition on .score-ring-fill actually animates the fill
+  // in, instead of just appearing pre-filled.
+  const RADIUS = 52, CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const targetOffset = CIRCUMFERENCE - (pct / 100) * CIRCUMFERENCE;
 
   scoreBlock.innerHTML = `
-    <div class="score-number">${pct}</div>
-    <div class="score-tier">${tier.title}</div>
-    <div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%"></div></div>
+    <div class="score-ring-wrap">
+      <svg viewBox="0 0 120 120">
+        <circle class="score-ring-bg" cx="60" cy="60" r="${RADIUS}"/>
+        <circle class="score-ring-fill" id="scoreRingFill" cx="60" cy="60" r="${RADIUS}" stroke="${tierSwatch.cssVar}"
+          stroke-dasharray="${CIRCUMFERENCE.toFixed(2)}" stroke-dashoffset="${CIRCUMFERENCE.toFixed(2)}" transform="rotate(-90 60 60)"/>
+      </svg>
+      <div class="score-ring-center">
+        <div class="score-number">${pct}</div>
+        <div class="score-tier" style="color:${tierSwatch.cssVar}">${tier.title}</div>
+      </div>
+    </div>
     <p class="score-tier-desc">${tier.desc}</p>
     ${rows.some((r) => !r.checkable) ? '<p class="score-footnote">Score is out of what could actually be checked — add an exact birth time for the full picture.</p>' : ''}
   `;
+  const ringFill = document.getElementById('scoreRingFill');
+  if(ringFill){
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      ringFill.style.strokeDashoffset = targetOffset.toFixed(2);
+    }));
+  }
 
   modifierList.innerHTML = rows.map(({ mod, checkable, isHit }) => {
     const state = !checkable ? 'pending' : (isHit ? 'hit' : 'miss');
-    const icon = state === 'hit' ? '✓' : (state === 'pending' ? '○' : '–');
     const text = state === 'pending' ? mod.needsTimeText : (isHit ? mod.hit(ctx) : mod.miss(ctx));
+    // pending rows get the dashed-outline treatment from .modifier-row.pending
+    // .modifier-icon in CSS regardless of what's passed here, so an empty
+    // circle is fine — the glyph would just be hidden by that override.
+    const icon = state === 'pending'
+      ? `<div class="icon-circle modifier-icon" style="width:36px;height:36px"></div>`
+      : mod.icon.house
+        ? `<div class="icon-circle modifier-icon" style="width:36px;height:36px;background:${getSwatch(mod.icon.colorKey).cssVar}">${ASTRO_CONTENT.houseIcon(mod.icon.house, getSwatch(mod.icon.colorKey).text, 20)}</div>`
+        : iconCircle(mod.icon.glyph, mod.icon.colorKey, 36, 'modifier-icon');
     return `
       <div class="modifier-row ${state} reveal">
-        <span class="modifier-status">${icon}</span>
+        ${icon}
         <div>
           <div class="modifier-label">${mod.label}${!checkable ? ' <span class="modifier-pending-tag">Needs birth time</span>' : ''}</div>
           <p class="modifier-text">${text}</p>
