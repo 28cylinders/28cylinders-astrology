@@ -34,6 +34,22 @@
 .transit-rising-note{font-family:'Space Mono',monospace;font-size:11px;line-height:1.6;opacity:.7;max-width:440px}
 .retro-mark{font-size:18px;color:var(--ink-3);cursor:help}
 @media(max-width:600px){ .transit-section{padding:40px 24px 4px} }
+
+/* shown in place of the filters+grid while every post in posts.js is
+   still published:false — same eyebrow/serif-italic language as
+   .mission above, so it reads as an intentional beat, not a blank
+   hole. See the hasPublished check near the bottom of this file. */
+.archive-pending{max-width:600px;margin:0 auto;padding:70px 32px 110px;text-align:center}
+.archive-pending-eyebrow{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;opacity:.5;margin-bottom:18px}
+.archive-pending-text{font-family:'Playfair Display',serif;font-size:clamp(19px,2.6vw,26px);font-weight:500;line-height:1.55;color:var(--white);opacity:.9}
+.archive-pending-text em{font-style:italic;font-weight:400}
+
+/* homepage callout for the humor calculator — reuses the mission
+   eyebrow, the transit section's serif title, and the transit
+   section's own pill button verbatim, so this reads as one more
+   section in the same family rather than a bolted-on ad for a tool. */
+.feature-tool{max-width:600px;margin:0 auto;padding:8px 32px 64px;text-align:center}
+.feature-tool .btn-transit-rising{text-decoration:none;display:inline-block;margin-top:6px}
 </style>
 </head>
 <body class="page-offset">
@@ -78,13 +94,33 @@
   </div>
 </section>
 
-<!-- FILTERS (auto-generated from posts.js categories) -->
-<div class="filters" id="filters" role="tablist" aria-label="Filter by category"></div>
+<!-- FEATURE CALLOUT — the humor calculator, linked from the homepage
+     itself (not just the nav), so there's something to click into
+     while the essays below are still being written. -->
+<section class="feature-tool" aria-label="Try the humor calculator">
+  <p class="mission-eyebrow">While the archive fills in</p>
+  <h2 class="transit-title">How funny <em>are</em> you?</h2>
+  <p class="transit-sub">Mercury, Venus, your 5th house, and a few key aspects to Uranus and Jupiter — read together as a comedic style and a score.</p>
+  <a class="btn-transit-rising" href="humor.html">Calculate my humor →</a>
+</section>
 
-<!-- ARCHIVE GRID (auto-generated from posts.js) -->
-<section class="archive">
-  <div class="archive-grid" id="archiveGrid"></div>
-  <p class="empty-state" id="emptyState" style="display:none">Nothing here yet in this category — check back soon.</p>
+<!-- FILTERS + ARCHIVE GRID (auto-generated from posts.js) — hidden
+     while every post in posts.js is still published:false, so the
+     homepage never shows a wall of "Coming Soon" placeholder cards.
+     Swaps back in automatically the moment a single real post goes
+     live — see the hasPublished check in the script below. -->
+<div id="archiveLive" style="display:none">
+  <div class="filters" id="filters" role="tablist" aria-label="Filter by category"></div>
+  <section class="archive">
+    <div class="archive-grid" id="archiveGrid"></div>
+    <p class="empty-state" id="emptyState" style="display:none">Nothing here yet in this category — check back soon.</p>
+  </section>
+</div>
+
+<!-- shown instead, for now, while the archive above is empty -->
+<section class="archive-pending" id="archivePending" aria-label="The Archive">
+  <p class="archive-pending-eyebrow">The Archive</p>
+  <p class="archive-pending-text">The first essays are still being written — Venus signs, birth charts, transits, and more. <em>Check back soon.</em></p>
 </section>
 
 <div id="site-footer"></div>
@@ -98,6 +134,8 @@
 const grid = document.getElementById('archiveGrid');
 const filtersEl = document.getElementById('filters');
 const emptyState = document.getElementById('emptyState');
+const archiveLive = document.getElementById('archiveLive');
+const archivePending = document.getElementById('archivePending');
 let activeCategory = 'All';
 
 function formatDate(iso){
@@ -157,8 +195,20 @@ function observeReveals(){
   document.querySelectorAll('.reveal:not(.visible)').forEach(el => revealObserver.observe(el));
 }
 
-renderFilters();
-renderGrid();
+// only show the real filters+grid once at least one post has actually
+// been written (published !== false) — otherwise the homepage would
+// just be a wall of "Coming Soon" cards. Swaps itself back on the
+// moment posts.js has real content, no manual step required.
+const hasPublished = POSTS.some(p => p.published !== false);
+if(hasPublished){
+  archiveLive.style.display = '';
+  archivePending.style.display = 'none';
+  renderFilters();
+  renderGrid();
+} else {
+  archiveLive.style.display = 'none';
+  archivePending.style.display = '';
+}
 </script>
 <script src="transit.js"></script>
 </body>
