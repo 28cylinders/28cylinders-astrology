@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>What Each Planet Rules in the Body — 28 Orbits</title>
+<meta name="description" content="A scroll-through guide to medical astrology — which planet traditionally rules which part of the body.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500&family=Short+Stack&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.bodymap-intro{max-width:680px;margin:0 auto;padding:130px 32px 30px;text-align:center}
+.bodymap-eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.5;margin-bottom:16px}
+.bodymap-title{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(30px,5vw,46px);line-height:1.05;margin-bottom:18px}
+.bodymap-title em{font-style:italic;font-weight:400}
+.bodymap-sub{font-family:'Space Mono',monospace;font-size:14px;line-height:1.75;opacity:.85;max-width:520px;margin:0 auto}
+
+.bodymap-scroller{display:grid;grid-template-columns:1fr 1fr;max-width:1100px;margin:0 auto;padding:20px 32px 60px;gap:20px}
+.bodymap-figure-wrap{position:relative}
+.bodymap-figure-sticky{position:sticky;top:90px;display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 0}
+#bodySvg{width:100%;max-width:260px;height:auto}
+#bodySvg .zone{transition:fill .35s ease}
+.bodymap-figure-caption{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.4;text-align:center}
+
+.bodymap-steps{display:flex;flex-direction:column}
+.bodymap-step{min-height:66vh;display:flex;align-items:center}
+.bodymap-step-inner{opacity:.3;transition:opacity .3s ease;padding:20px 0}
+.bodymap-step.active .bodymap-step-inner{opacity:1}
+.bodymap-step-label{display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.65;margin-bottom:12px}
+.bodymap-step-part{font-family:'Playfair Display',serif;font-size:clamp(26px,4vw,38px);font-weight:600;margin-bottom:14px;color:var(--white)}
+.bodymap-step-themes{font-family:'Space Mono',monospace;font-size:14px;line-height:1.75;opacity:.85;max-width:420px}
+
+@media(max-width:800px){
+  .bodymap-scroller{grid-template-columns:1fr;padding-top:0}
+  .bodymap-figure-sticky{top:70px}
+  .bodymap-step{min-height:50vh}
+}
+@media (prefers-reduced-motion: reduce){
+  #bodySvg .zone{transition:none}
+  .bodymap-step-inner{transition:none}
+}
+</style>
+</head>
+<body class="page-offset">
+<div id="site-nav"></div>
+<script src="chrome.js" defer></script>
+
+<section class="bodymap-intro">
+  <p class="bodymap-eyebrow">Medical Astrology · A First Pass</p>
+  <h1 class="bodymap-title">What each planet <em>rules</em> in the body.</h1>
+  <p class="bodymap-sub">You don't need to know anything about astrology to follow this — scroll down, and each planet lights up the part of the body it traditionally governs, one at a time.</p>
+</section>
+
+<section class="bodymap-scroller">
+  <div class="bodymap-figure-wrap">
+    <div class="bodymap-figure-sticky">
+      <svg id="bodySvg" viewBox="0 0 200 400" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.5" aria-hidden="true">
+        <!-- head — Mars -->
+        <circle class="zone" data-planet="mars" cx="100" cy="32" r="22"/>
+        <!-- throat — Venus -->
+        <rect class="zone" data-planet="venus" x="88" y="52" width="24" height="15" rx="6"/>
+        <!-- arms + hands — Mercury -->
+        <path class="zone" data-planet="mercury" d="M72 70 Q38 90 30 138" stroke-width="12" stroke-linecap="round"/>
+        <circle class="zone" data-planet="mercury" cx="29" cy="144" r="9"/>
+        <path class="zone" data-planet="mercury" d="M128 70 Q162 90 170 138" stroke-width="12" stroke-linecap="round"/>
+        <circle class="zone" data-planet="mercury" cx="171" cy="144" r="9"/>
+        <!-- chest / heart + spine — Sun -->
+        <rect class="zone" data-planet="sun" x="62" y="68" width="76" height="44" rx="14"/>
+        <!-- stomach — Moon -->
+        <rect class="zone" data-planet="moon" x="67" y="114" width="66" height="34" rx="11"/>
+        <!-- hips + thighs — Jupiter -->
+        <rect class="zone" data-planet="jupiter" x="63" y="150" width="74" height="24" rx="11"/>
+        <rect class="zone" data-planet="jupiter" x="66" y="176" width="29" height="52" rx="11"/>
+        <rect class="zone" data-planet="jupiter" x="105" y="176" width="29" height="52" rx="11"/>
+        <!-- reproductive system — Pluto -->
+        <ellipse class="zone" data-planet="pluto" cx="100" cy="163" rx="14" ry="9"/>
+        <!-- knees — Saturn -->
+        <circle class="zone" data-planet="saturn" cx="80" cy="234" r="10"/>
+        <circle class="zone" data-planet="saturn" cx="120" cy="234" r="10"/>
+        <!-- ankles — Uranus -->
+        <rect class="zone" data-planet="uranus" x="73" y="244" width="15" height="46" rx="7"/>
+        <rect class="zone" data-planet="uranus" x="112" y="244" width="15" height="46" rx="7"/>
+        <!-- feet — Neptune -->
+        <ellipse class="zone" data-planet="neptune" cx="72" cy="298" rx="19" ry="8"/>
+        <ellipse class="zone" data-planet="neptune" cx="128" cy="298" rx="19" ry="8"/>
+      </svg>
+      <p class="bodymap-figure-caption">A schematic placeholder — swap for real illustration later</p>
+    </div>
+  </div>
+  <div class="bodymap-steps" id="bodymapSteps"></div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="colors.js"></script>
+<script src="content.js"></script>
+<script src="bodymap.js"></script>
+</body>
+</html>

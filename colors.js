@@ -72,4 +72,19 @@ const CATEGORY_COLORS = {
   'Nodes': 'violet',
 };
 
-window.ASTRO_COLORS = { PALETTE, swatch, contrastRatio, textOn, PLANET_COLORS, HOUSE_COLOR_KEYS, CATEGORY_COLORS };
+// the humor calculator's 8 comedy-style buckets (see humor.js) — colors
+// deliberately echo each style's ruling planet from PLANET_COLORS above,
+// so e.g. "Wordplay Wit" (Gemini, Mercury-ruled) reuses Mercury's sky,
+// same "one hue, one meaning, reused on purpose" logic as everywhere else.
+const COMEDY_STYLE_COLORS = {
+  wordplay: 'sky',            // Gemini — Mercury-ruled
+  storyteller: 'purple',      // Sagittarius — Jupiter-ruled
+  deadpanAbsurdist: 'cobalt',  // Aquarius — Uranus (modern ruler)
+  whimsical: 'lavender',      // Cancer/Pisces — Moon-ruled (Cancer)
+  darkCutting: 'coral',       // Scorpio — Pluto (modern ruler)
+  dryObservational: 'teal',   // Virgo/Capricorn — Saturn-ruled (Capricorn)
+  performative: 'yellow',     // Leo/Aries — Sun-ruled (Leo)
+  charmingTease: 'pink',      // Libra/Taurus — Venus-ruled
+};
+
+window.ASTRO_COLORS = { PALETTE, swatch, contrastRatio, textOn, PLANET_COLORS, HOUSE_COLOR_KEYS, CATEGORY_COLORS, COMEDY_STYLE_COLORS };

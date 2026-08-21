@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>How Funny Am I? — 28 Orbits</title>
+<meta name="description" content="A humor calculator: what your Mercury, Venus, 5th house, and a few key aspects say about your comedic style — and how funny your chart says you are.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500&family=Short+Stack&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* .tool-wrap/.form-card/.field/.place-*/.btn-calc/.restore-banner all
+   live in style.css now (shared with chart.html). Everything below is
+   specific to this page's results: two style cards, a score meter, and
+   a scored checklist — none of which exist anywhere else on the site. */
+
+.results{display:none;margin-top:44px}
+.results.visible{display:block}
+.results-note{font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.8;opacity:.8;text-align:center;margin-bottom:28px;padding:0 20px}
+.results-note strong{opacity:1}
+.section-label{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.55;
+  margin:40px 0 14px;text-align:center;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
+.section-label:first-of-type{margin-top:0;padding-top:0;border-top:none}
+
+/* ── two style cards: Mercury ("how you're funny") + Venus ("what
+   tickles you") — same white-card language as hl-card/placement-row
+   elsewhere, just roomier since there's a full sentence to hold. ── */
+.style-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.style-card{background:var(--white);color:var(--ink-1);border-radius:2px;padding:22px 20px;box-shadow:0 8px 18px rgba(0,0,0,.35);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease}
+.style-card:hover{transform:translateY(-4px);box-shadow:0 16px 28px rgba(0,0,0,.45)}
+.style-card-label{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:12px}
+.style-card-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;line-height:1.15;margin-bottom:10px;color:var(--ink-1)}
+.style-card-line{font-family:'Space Mono',monospace;font-size:13px;line-height:1.65;color:var(--ink-1);opacity:.85;margin-bottom:12px}
+.style-card-note{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ── score meter — the one big number on the page ── */
+.score-block{text-align:center;max-width:520px;margin:0 auto}
+.score-number{font-family:'Playfair Display',serif;font-size:clamp(52px,10vw,84px);font-weight:600;line-height:1;color:var(--white)}
+.score-tier{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white);opacity:.85;margin-top:2px}
+.score-bar-track{margin:20px auto 18px;max-width:360px;height:8px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden}
+.score-bar-fill{height:100%;border-radius:999px;background:var(--pink);transition:width .6s cubic-bezier(.34,1.2,.4,1)}
+.score-tier-desc{font-family:'Space Mono',monospace;font-size:13px;line-height:1.75;opacity:.85;padding:0 12px}
+.score-footnote{font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.6;opacity:.55;margin-top:14px;padding:0 12px}
+
+/* ── scored checklist ── */
+.modifier-list{display:flex;flex-direction:column;gap:10px;max-width:640px;margin:0 auto}
+.modifier-row{background:var(--white);color:var(--ink-1);border-radius:2px;padding:14px 16px;box-shadow:0 4px 10px rgba(0,0,0,.25);
+  display:flex;gap:12px;align-items:flex-start;text-align:left}
+.modifier-status{flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;margin-top:1px}
+.modifier-row.hit .modifier-status{background:var(--teal);color:#fff}
+.modifier-row.miss .modifier-status{background:#e5e5e5;color:var(--ink-3)}
+.modifier-row.pending .modifier-status{background:transparent;border:1.5px dashed var(--ink-3);color:var(--ink-3)}
+.modifier-label{font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;letter-spacing:.03em;color:var(--ink-1);margin-bottom:4px}
+.modifier-pending-tag{font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:9.5px;color:var(--ink-3);border:1px solid rgba(0,0,0,.2);border-radius:999px;padding:2px 7px;margin-left:6px}
+.modifier-text{font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.6;color:var(--ink-2)}
+
+.disclosure{max-width:640px;margin:48px auto 0;font-family:'Space Mono',monospace;font-size:12px;line-height:1.7;opacity:.55;text-align:center;padding:0 20px}
+
+@media(max-width:700px){
+  .style-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body class="page-offset">
+<div id="site-nav"></div>
+<script src="chrome.js" defer></script>
+
+<section class="tool-wrap">
+  <div class="tool-head">
+    <p class="tool-eyebrow">Humor Calculator</p>
+    <h1 class="serif tool-title">How funny am I, really?</h1>
+    <p class="tool-sub">Mercury (how you think), Venus (what charms you), your 5th house (playfulness), and a few key aspects to Uranus and Jupiter — read together as a comedic style and a score. For fun, not a diagnosis.</p>
+  </div>
+
+  <div class="restore-banner" id="restoreBanner">
+    <span>Using the chart you already calculated on this device.</span>
+    <button type="button" id="clearSavedChart">Start over with different info</button>
+  </div>
+
+  <form class="form-card" id="humorForm">
+    <div class="field">
+      <label for="birthDate">Birth date</label>
+      <input type="date" id="birthDate" required>
+    </div>
+
+    <div class="toggle-row">
+      <input type="checkbox" id="knowsTime" checked>
+      <label for="knowsTime">I know my exact birth time</label>
+    </div>
+
+    <div class="field" id="timeField">
+      <label for="birthTime">Birth time (as exact as possible)</label>
+      <input type="time" id="birthTime">
+    </div>
+    <p class="time-note" id="unknownTimeNote" style="display:none">
+      Without an exact time we can't reliably check your 5th house — that's extremely time-sensitive. Everything else here (Mercury, Venus, Sun, Jupiter, and their aspects) still works fine using solar noon as a stand-in.
+    </p>
+
+    <div class="field">
+      <label for="birthPlace">Birth place</label>
+      <div class="place-wrap" id="placeWrap">
+        <div class="place-row">
+          <input type="text" id="birthPlace" placeholder="Start typing a city…" autocomplete="off">
+          <button type="button" class="btn-find" id="findPlace">Find</button>
+        </div>
+        <div class="place-results" id="placeResults"></div>
+      </div>
+      <p class="place-status" id="placeStatus"></p>
+    </div>
+
+    <button type="submit" class="btn-calc" id="calcBtn" disabled>Calculate my humor</button>
+    <p class="form-error" id="formError" style="display:none" role="alert"></p>
+  </form>
+
+  <div class="results" id="results" aria-live="polite">
+    <p class="results-note" id="resultsNote"></p>
+
+    <p class="section-label">Your comedic profile</p>
+    <div class="style-grid" id="styleGrid"></div>
+
+    <p class="section-label">Humor score</p>
+    <div class="score-block" id="scoreBlock"></div>
+
+    <p class="section-label">What's actually behind that number</p>
+    <div class="modifier-list" id="modifierList"></div>
+
+    <p class="disclosure">This is the exploratory, for-fun corner of an exploratory astrology site — the chart math underneath is real (whole sign houses, tropical zodiac, major aspects), but which placements "count" toward being funny, and how much, is our own read, not a settled science. Take it as a prompt, not a verdict.</p>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="colors.js"></script>
+<script src="content.js"></script>
+<script src="vendor/circular-natal-horoscope.bundle.js"></script>
+<script src="humor.js"></script>
+</body>
+</html>

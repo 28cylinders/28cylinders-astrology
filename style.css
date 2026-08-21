@@ -121,6 +121,69 @@ nav.solid{background:rgba(0,0,0,.96);backdrop-filter:blur(16px);border-bottom-co
   .highlight-grid{grid-template-columns:repeat(2,1fr)}
 }
 
+/* ── SHARED TOOL/CALCULATOR CHROME — birth-data form + intro header,
+   used by every "put your birth info in, get something out" page
+   (chart.html was the only one until humor.html made it the second;
+   two consumers with byte-identical markup is the line, same call
+   chrome.js already made for nav/footer — extracted here instead of
+   copy-pasted a second time). Page-specific results (the chart's
+   placements/houses grids, the humor page's score meter, etc.) still
+   live in each page's own inline <style>. ── */
+.tool-wrap{max-width:800px;margin:0 auto;padding:110px 32px 24px}
+.tool-head{text-align:center;margin-bottom:32px}
+.tool-eyebrow{font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.6;margin-bottom:16px}
+.tool-title{font-size:clamp(30px,5vw,46px);font-weight:600;line-height:1.1;margin-bottom:16px}
+.tool-sub{font-family:'Space Mono',monospace;font-size:14.5px;line-height:1.75;opacity:.82;max-width:520px;margin:0 auto}
+
+.form-card{background:var(--white);color:var(--ink-1);border-radius:2px;padding:36px 32px;box-shadow:0 10px 30px rgba(0,0,0,.4);transform:rotate(-.3deg)}
+.field{margin-bottom:22px}
+.field label{display:block;font-family:'Space Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:8px}
+.field input[type=date],.field input[type=time],.field input[type=text]{
+  width:100%;font-family:'Space Mono',monospace;font-size:15px;padding:11px 12px;border:1.5px solid rgba(0,0,0,.25);
+  border-radius:2px;background:#fafafa;color:var(--ink-1);
+}
+.field input:focus-visible{outline:3px solid var(--teal);outline-offset:1px;border-color:var(--ink-1)}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.toggle-row input{width:17px;height:17px}
+.toggle-row label{font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-1);margin:0}
+.time-note{font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;color:var(--ink-2);margin-top:-10px;margin-bottom:20px}
+
+.place-wrap{position:relative}
+.place-row{display:flex;gap:8px}
+.place-row input{flex:1}
+.btn-find{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:0 18px;border:1.5px solid #1a1a1a;background:#1a1a1a;color:#fff;border-radius:2px;cursor:pointer;white-space:nowrap}
+.btn-find:hover{opacity:.85}
+.place-results{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:30;background:#fff;border:1px solid rgba(0,0,0,.15);
+  border-radius:2px;max-height:230px;overflow-y:auto;box-shadow:0 10px 24px rgba(0,0,0,.2);display:none}
+.place-results.open{display:block}
+.place-option{display:block;width:100%;text-align:left;font-family:'Space Mono',monospace;font-size:12.5px;padding:11px 12px;
+  border:none;border-bottom:1px solid rgba(0,0,0,.08);background:#fff;color:var(--ink-1);cursor:pointer}
+.place-option:last-child{border-bottom:none}
+.place-option:hover,.place-option:focus-visible{background:#eee}
+.place-status{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-2);margin-top:8px}
+
+.btn-calc{width:100%;margin-top:8px;font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:15px;border:none;border-radius:999px;background:#1a1a1a;color:#fff;cursor:pointer;transition:transform .15s}
+.btn-calc:hover{transform:translateY(-2px)}
+.btn-calc:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.form-error{font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;color:var(--pink);margin-top:14px}
+
+/* saved-on-this-device banner — localStorage is per-browser/per-computer
+   by design, so this never shows anyone else's saved data. */
+.restore-banner{display:none;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.25);border-radius:2px;
+  padding:14px 18px;margin-bottom:24px;font-family:'Space Mono',monospace;font-size:12px;color:var(--white);
+  align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.restore-banner.visible{display:flex}
+.restore-banner button{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  background:none;border:1px solid rgba(255,255,255,.3);color:var(--white);padding:7px 14px;border-radius:999px;cursor:pointer}
+.restore-banner button:hover{background:rgba(255,255,255,.1)}
+@media(max-width:600px){
+  .tool-wrap{padding-top:100px}
+  .form-card{padding:26px 20px}
+}
+
 /* ── SCROLL REVEAL — cards fade, lift, and grow slightly in as they enter
    view (a subtle expand, not just a fade), on a slightly bouncy easing.
    Disabled entirely for anyone with reduced-motion set (ADA / WCAG 2.3.3). ── */
