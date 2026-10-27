@@ -6,6 +6,8 @@
 
    category   → controls the filter pills + accent color
    date       → shown like a ticket stamp on the card
+   kind/time/cta/promise/thumb → what the archive card shows: type label,
+                read time, button text, one-line payoff, illustration key
    href       → optional: link to a standalone interactive page instead of post.html
    cover      → optional image path (leave "" for placeholder)
    published  → false = shows a "Coming Soon" tag on the archive card
@@ -23,6 +25,8 @@
 const POSTS = [
   {
     id: 'body-map',
+    kind: 'Interactive', time: '3 min', cta: 'Explore the map', thumb: 'body',
+    promise: 'See which planet rules each body part, and try one small practice to feel it.',
     title: 'What Each Planet Rules in the Body',
     category: 'Self',
     date: '2026-10-27',
@@ -33,6 +37,8 @@ const POSTS = [
   },
   {
     id: 'how-funny-are-you',
+    kind: 'Calculator', time: '2 min', cta: 'Get my score', thumb: 'laugh',
+    promise: 'Find your comedy style and score straight from your chart.',
     title: 'How Funny Are You? Your Chart, Scored',
     category: 'Humor',
     date: '2026-10-27',
@@ -43,13 +49,15 @@ const POSTS = [
   },
   {
     id: 'mc-and-ic',
+    kind: 'Interactive', time: '4 min', cta: 'Find my career fit', thumb: 'scale',
+    promise: 'Pick your sign and get career moves that fit, plus what to protect at home so they last.',
     title: 'Your MC Is the Roof. Your IC Is What Holds It Up.',
     category: 'Career',
     date: '2026-10-27',
     excerpt: 'The two points that speak to career fulfillment and money, and why the private foundation (IC) shapes how far the public ambition (MC) can go.',
     cover: '',
     published: true,
-    widget: 'mc-ic',
+    href: 'mc-and-ic.html',
     body: `You know your Sun, Moon, and Rising. Two more points sit on the same axis, and they carry a lot of weight when it comes to work, money, and what you're actually here to build: the MC and the IC.
 
 Picture your chart as a circle. Your Rising sign sits on the left horizon. The <strong>MC</strong> (Medium Coeli, Latin for "middle of the sky") is the very top of the chart, where the Sun would sit at noon on your birthday. The <strong>IC</strong> (Imum Coeli, "bottom of the sky") is directly opposite, the point beneath your feet at midnight. They are always exactly 180° apart, so one tells you the other: an MC in Capricorn means an IC in Cancer.

@@ -42,6 +42,7 @@
 .today-mantra{margin:0;font-family:'Short Stack',cursive;font-size:clamp(24px,3.4vw,32px);line-height:1.35;color:var(--white)}
 .today-mantra span{display:block;font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--c,#fff);margin-bottom:8px}
 @media(max-width:600px){.today-cols{grid-template-columns:1fr;gap:18px}.today-do{border-right:0;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:18px}.today-do,.today-dont{padding:4px 6px}}
+.archive-head{text-align:center;max-width:620px;margin:0 auto;padding:70px 32px 0}
 .transit-rising-row{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:10px}
 .btn-transit-rising{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   padding:11px 22px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:var(--white);border-radius:999px;cursor:pointer;transition:background .2s}
@@ -76,11 +77,11 @@
 <!-- HERO / COLLAGE (placeholder scraps — swap for real photographed ephemera) -->
 <section class="hero" aria-label="Intro">
   <!-- scattered placeholder elements, positioned loosely like a real desk/corkboard -->
-  <img class="scrap-photo" src="images/polaroid-1.jpg" alt="" loading="eager" style="width:130px;top:14%;left:18%;transform:rotate(-8deg)">
-  <div class="scrap" style="width:100px;height:130px;top:58%;left:12%;transform:rotate(6deg)">[tarot card]</div>
-  <div class="scrap" style="width:120px;height:80px;top:20%;right:9%;transform:rotate(9deg)">[ticket stub]</div>
-  <img class="scrap-photo" src="images/wheel-scrap.png" alt="" loading="eager" style="width:100px;bottom:9%;right:15%;transform:rotate(8deg)">
-  <div class="scrap" style="width:110px;height:70px;bottom:8%;left:32%;transform:rotate(3deg)">[dried flower]</div>
+  <img class="scrap-photo" data-react src="images/polaroid-1.jpg" alt="" loading="eager" style="width:130px;top:14%;left:18%;transform:rotate(-8deg)">
+  <div class="scrap" data-react style="width:100px;height:130px;top:46%;left:12%;transform:rotate(6deg)">[tarot card]</div>
+  <img class="scrap-photo" data-react src="images/ticket-scrap.png" alt="" loading="eager" style="width:92px;top:18%;right:10%;transform:rotate(9deg)">
+  <img class="scrap-photo" data-react src="images/wheel-scrap.png" alt="" loading="eager" style="width:165px;bottom:8%;right:13%;transform:rotate(8deg)">
+  <img class="scrap-photo" data-react src="images/balloon-scrap.png" alt="" loading="eager" style="width:110px;bottom:5%;left:4%;transform:rotate(-9deg)">
   <div class="scrap-label" style="top:10%;left:40%;transform:rotate(-3deg)">est. 2026</div>
 
   <div class="hero-title-wrap">
@@ -117,6 +118,11 @@
      Swaps back in automatically the moment a single real post goes
      live — see the hasPublished check in the script below. -->
 <div id="archiveLive" style="display:none">
+  <div class="archive-head">
+    <p class="mission-eyebrow">The Archive</p>
+    <h2 class="transit-title">Start <em>here.</em></h2>
+    <p class="transit-sub">Short, visual, and hands-on. Pick one, play with it, and find out something new about your chart.</p>
+  </div>
   <div class="filters" id="filters" role="tablist" aria-label="Filter by category"></div>
   <section class="archive">
     <div class="archive-grid" id="archiveGrid"></div>
@@ -150,6 +156,21 @@ function formatDate(iso){
   return d.toLocaleDateString('en-US', { month:'short', day:'2-digit', year:'numeric' }).toUpperCase();
 }
 
+// card illustrations — small, bold, drawn in the site's own colors
+const THUMBS = {
+  scale: () => `<svg viewBox="0 0 300 170" role="img" aria-label="A tilting balance scale"><g transform="rotate(-8 150 70)"><rect x="40" y="66" width="220" height="8" rx="4" fill="#111"/>
+    <g transform="translate(44 70)"><path d="M0 0L-30 52M0 0L30 52" stroke="#111" stroke-width="2"/><path d="M-36 52H36Q32 76 0 76T-36 52Z" fill="#F43F5E"/><text y="68" text-anchor="middle" font-family="monospace" font-weight="700" font-size="13" fill="#fff">IC</text></g>
+    <g transform="translate(256 70)"><path d="M0 0L-30 52M0 0L30 52" stroke="#111" stroke-width="2"/><path d="M-36 52H36Q32 76 0 76T-36 52Z" fill="#FDE047"/><text y="68" text-anchor="middle" font-family="monospace" font-weight="700" font-size="13" fill="#111">MC</text></g></g>
+    <path d="M150 74L128 160H172Z" fill="#111"/><circle cx="150" cy="70" r="8" fill="#fff" stroke="#111" stroke-width="3"/></svg>`,
+  body: () => `<svg viewBox="40 0 120 215" role="img" aria-label="A body figure with colored zones"><g transform="scale(.5)">
+    <path d="M100 52L92 52 91 68C78 71 60 73 53 83 47 93 45 122 42 150 40 176 37 200 35 224 34 236 38 245 43 241 47 233 49 214 53 196 56 178 59 156 62 134 64 152 72 168 77 182 72 198 65 212 66 232 67 262 72 300 76 322 80 345 80 370 80 396 76 404 70 414 72 422L92 422C93 414 91 404 90 396 91 370 92 345 94 322 97 300 99 268 100 238Z" fill="#111"/>
+    <path d="M100 52L108 52 109 68C122 71 140 73 147 83 153 93 155 122 158 150 160 176 163 200 165 224 166 236 162 245 157 241 153 233 151 214 147 196 144 178 141 156 138 134 136 152 128 168 123 182 128 198 135 212 134 232 133 262 128 300 124 322 120 345 120 370 120 396 124 404 130 414 128 422L108 422C107 414 109 404 110 396 109 370 108 345 106 322 103 300 101 268 100 238Z" fill="#111"/>
+    <ellipse cx="100" cy="32" rx="17" ry="22" fill="#F97316"/><rect x="92" y="54" width="16" height="14" rx="5" fill="#F43F5E"/><rect x="66" y="76" width="68" height="52" rx="16" fill="#FDE047"/><rect x="78" y="130" width="44" height="42" rx="13" fill="#A78BFA"/><rect x="70" y="190" width="60" height="36" rx="14" fill="#5B21B6"/><circle cx="85" cy="326" r="9" fill="#0D9488"/><circle cx="115" cy="326" r="9" fill="#0D9488"/><rect x="80" y="372" width="10" height="26" rx="4" fill="#1D4ED8"/><rect x="110" y="372" width="10" height="26" rx="4" fill="#1D4ED8"/></g></svg>`,
+  laugh: () => `<svg viewBox="0 0 300 170" role="img" aria-label="A comedy score gauge"><path d="M40 150A110 110 0 0 1 260 150" fill="none" stroke="#111" stroke-width="26" stroke-linecap="round"/>
+    <path d="M40 150A110 110 0 0 1 95 55" fill="none" stroke="#0D9488" stroke-width="18" stroke-linecap="round"/><path d="M110 46A110 110 0 0 1 190 46" fill="none" stroke="#F97316" stroke-width="18" stroke-linecap="round"/><path d="M205 55A110 110 0 0 1 260 150" fill="none" stroke="#F43F5E" stroke-width="18" stroke-linecap="round"/>
+    <text x="150" y="140" text-anchor="middle" font-family="'Short Stack',cursive" font-size="44" fill="#111">HA!</text></svg>`,
+};
+
 function renderFilters(){
   const cats = ['All', ...new Set(POSTS.map(p => p.category))];
   filtersEl.innerHTML = cats.map(c =>
@@ -174,10 +195,13 @@ function renderGrid(){
     return `
     <a class="card reveal${p.published === false ? ' card-coming-soon' : ''}" href="${p.href || 'post.html?id=' + p.id}" style="transition-delay:${delay}s">
       ${p.published === false ? '<span class="coming-soon-tag">Coming Soon</span>' : ''}
-      <span class="card-tag" style="background:${sw.cssVar};color:${sw.text}">${p.category}</span>
-      <div class="card-title">${p.title}</div>
-      <p class="card-excerpt">${p.excerpt}</p>
-      <div class="card-stub"><span>${formatDate(p.date)}</span><span>${p.published === false ? 'Coming soon' : 'Read →'}</span></div>
+      <div class="card-visual" style="background:${sw.cssVar}">${THUMBS[p.thumb] ? THUMBS[p.thumb]() : ''}</div>
+      <div class="card-body">
+        <div class="card-meta"><span class="card-tag" style="background:#111;color:#fff">${p.category}</span><span class="card-kind">${p.kind || 'Article'}${p.time ? ' · ' + p.time : ''}</span></div>
+        <div class="card-title">${p.title}</div>
+        <p class="card-excerpt">${p.promise || p.excerpt}</p>
+        <span class="card-cta">${p.cta || 'Read'} <span aria-hidden="true">→</span></span>
+      </div>
     </a>
   `;
   }).join('');
@@ -218,5 +242,6 @@ if(hasPublished){
 }
 </script>
 <script src="transit.js"></script>
+<script src="scrapbook.js"></script>
 </body>
 </html>
