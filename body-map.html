@@ -19,8 +19,10 @@
 .bodymap-scroller{display:grid;grid-template-columns:1fr 1fr;max-width:1100px;margin:0 auto;padding:20px 32px 60px;gap:20px}
 .bodymap-figure-wrap{position:relative}
 .bodymap-figure-sticky{position:sticky;top:90px;display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 0}
-#bodySvg{width:100%;max-width:260px;height:auto}
-#bodySvg .zone{transition:fill .35s ease}
+#bodySvg{width:100%;max-width:230px;height:auto;max-height:78vh}
+#bodySvg .zone{transition:fill .35s ease,filter .2s;cursor:pointer}
+#bodySvg .zone:hover{filter:brightness(1.6)}
+#bodySvg .zone:focus-visible{outline:2px solid #fff;outline-offset:1px}
 .bodymap-figure-caption{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.4;text-align:center}
 
 .bodymap-steps{display:flex;flex-direction:column}
@@ -29,6 +31,8 @@
 .bodymap-step.active .bodymap-step-inner{opacity:1}
 .bodymap-step-label{display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.65;margin-bottom:12px}
 .bodymap-step-part{font-family:'Playfair Display',serif;font-size:clamp(26px,4vw,38px);font-weight:600;margin-bottom:14px;color:var(--white)}
+.bodymap-step-connect{margin-top:16px;max-width:420px;background:var(--white);color:var(--ink-1);border-radius:3px;padding:12px 16px;font-family:'Space Mono',monospace;font-size:13px;line-height:1.6;border-left:6px solid var(--c,#111);box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.bodymap-step-connect b{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin-bottom:4px}
 .bodymap-step-themes{font-family:'Space Mono',monospace;font-size:14px;line-height:1.75;opacity:.85;max-width:420px}
 
 @media(max-width:800px){
@@ -47,45 +51,59 @@
 <script src="chrome.js" defer></script>
 
 <section class="bodymap-intro">
-  <p class="bodymap-eyebrow">Medical Astrology · A First Pass</p>
+  <p class="bodymap-eyebrow">Medical Astrology</p>
   <h1 class="bodymap-title">What each planet <em>rules</em> in the body.</h1>
-  <p class="bodymap-sub">You don't need to know anything about astrology to follow this — scroll down, and each planet lights up the part of the body it traditionally governs, one at a time.</p>
+  <p class="bodymap-sub">Scroll, or tap a body part, to see which planet rules it.</p>
 </section>
 
 <section class="bodymap-scroller">
   <div class="bodymap-figure-wrap">
     <div class="bodymap-figure-sticky">
-      <svg id="bodySvg" viewBox="0 0 200 400" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.5" aria-hidden="true">
-        <!-- head — Mars -->
-        <circle class="zone" data-planet="mars" cx="100" cy="32" r="22"/>
-        <!-- throat — Venus -->
-        <rect class="zone" data-planet="venus" x="88" y="52" width="24" height="15" rx="6"/>
-        <!-- arms + hands — Mercury -->
-        <path class="zone" data-planet="mercury" d="M72 70 Q38 90 30 138" stroke-width="12" stroke-linecap="round"/>
-        <circle class="zone" data-planet="mercury" cx="29" cy="144" r="9"/>
-        <path class="zone" data-planet="mercury" d="M128 70 Q162 90 170 138" stroke-width="12" stroke-linecap="round"/>
-        <circle class="zone" data-planet="mercury" cx="171" cy="144" r="9"/>
-        <!-- chest / heart + spine — Sun -->
-        <rect class="zone" data-planet="sun" x="62" y="68" width="76" height="44" rx="14"/>
-        <!-- stomach — Moon -->
-        <rect class="zone" data-planet="moon" x="67" y="114" width="66" height="34" rx="11"/>
-        <!-- hips + thighs — Jupiter -->
-        <rect class="zone" data-planet="jupiter" x="63" y="150" width="74" height="24" rx="11"/>
-        <rect class="zone" data-planet="jupiter" x="66" y="176" width="29" height="52" rx="11"/>
-        <rect class="zone" data-planet="jupiter" x="105" y="176" width="29" height="52" rx="11"/>
-        <!-- reproductive system — Pluto -->
-        <ellipse class="zone" data-planet="pluto" cx="100" cy="163" rx="14" ry="9"/>
-        <!-- knees — Saturn -->
-        <circle class="zone" data-planet="saturn" cx="80" cy="234" r="10"/>
-        <circle class="zone" data-planet="saturn" cx="120" cy="234" r="10"/>
-        <!-- ankles — Uranus -->
-        <rect class="zone" data-planet="uranus" x="73" y="244" width="15" height="46" rx="7"/>
-        <rect class="zone" data-planet="uranus" x="112" y="244" width="15" height="46" rx="7"/>
-        <!-- feet — Neptune -->
-        <ellipse class="zone" data-planet="neptune" cx="72" cy="298" rx="19" ry="8"/>
-        <ellipse class="zone" data-planet="neptune" cx="128" cy="298" rx="19" ry="8"/>
+      <svg id="bodySvg" viewBox="0 0 200 430" fill="none" role="group" aria-label="Body figure. Select a body part to jump to the planet that rules it.">
+        <defs>
+          <!-- one original half-body outline, mirrored for the other side -->
+          <path id="bodyFill" d="M100 52 L92 52 L91 68 C78 71 60 73 53 83 C47 93 45 122 42 150 C40 176 37 200 35 224 C34 236 38 245 43 241 C47 233 49 214 53 196 C56 178 59 156 62 134 C64 152 72 168 77 182 C72 198 65 212 66 232 C67 262 72 300 76 322 C80 345 80 370 80 396 C76 404 70 414 72 422 L92 422 C93 414 91 404 90 396 C91 370 92 345 94 322 C97 300 99 268 100 238 Z"/>
+          <path id="bodyLine" d="M92 52 L91 68 C78 71 60 73 53 83 C47 93 45 122 42 150 C40 176 37 200 35 224 C34 236 38 245 43 241 C47 233 49 214 53 196 C56 178 59 156 62 134 C64 152 72 168 77 182 C72 198 65 212 66 232 C67 262 72 300 76 322 C80 345 80 370 80 396 C76 404 70 414 72 422 L92 422 C93 414 91 404 90 396 C91 370 92 345 94 322 C97 300 99 268 100 238"/>
+        </defs>
+        <use href="#bodyFill" fill="#1c1c1c"/>
+        <use href="#bodyFill" fill="#1c1c1c" transform="translate(200 0) scale(-1 1)"/>
+        <g stroke="none">
+          <!-- head — Mars -->
+          <ellipse class="zone" data-planet="mars" cx="100" cy="32" rx="17" ry="22"/>
+          <!-- throat — Venus -->
+          <rect class="zone" data-planet="venus" x="92" y="54" width="16" height="14" rx="5"/>
+          <!-- arms + hands — Mercury (left, then mirrored right) -->
+          <path class="zone" data-planet="mercury" d="M53 84 C47 94 45 122 42 150 C40 176 37 200 35 224 L45 226 C49 214 51 196 54 178 C57 160 59 140 61 126 C60 105 58 92 53 84Z"/>
+          <ellipse class="zone" data-planet="mercury" cx="40" cy="235" rx="6" ry="9"/>
+          <path class="zone" data-planet="mercury" transform="translate(200 0) scale(-1 1)" d="M53 84 C47 94 45 122 42 150 C40 176 37 200 35 224 L45 226 C49 214 51 196 54 178 C57 160 59 140 61 126 C60 105 58 92 53 84Z"/>
+          <ellipse class="zone" data-planet="mercury" cx="160" cy="235" rx="6" ry="9"/>
+          <!-- chest / heart + spine — Sun -->
+          <rect class="zone" data-planet="sun" x="66" y="76" width="68" height="52" rx="16"/>
+          <!-- stomach — Moon -->
+          <rect class="zone" data-planet="moon" x="78" y="130" width="44" height="42" rx="13"/>
+          <!-- hips + thighs — Jupiter -->
+          <rect class="zone" data-planet="jupiter" x="70" y="190" width="60" height="36" rx="14"/>
+          <path class="zone" data-planet="jupiter" d="M67 228 C68 262 72 300 76 316 L94 316 C97 300 99 268 100 238Z"/>
+          <path class="zone" data-planet="jupiter" transform="translate(200 0) scale(-1 1)" d="M67 228 C68 262 72 300 76 316 L94 316 C97 300 99 268 100 238Z"/>
+          <!-- reproductive system — Pluto -->
+          <ellipse class="zone" data-planet="pluto" cx="100" cy="212" rx="11" ry="9"/>
+          <!-- knees — Saturn -->
+          <circle class="zone" data-planet="saturn" cx="85" cy="326" r="9"/>
+          <circle class="zone" data-planet="saturn" cx="115" cy="326" r="9"/>
+          <!-- ankles — Uranus -->
+          <rect class="zone" data-planet="uranus" x="80" y="372" width="10" height="26" rx="4"/>
+          <rect class="zone" data-planet="uranus" x="110" y="372" width="10" height="26" rx="4"/>
+          <!-- feet — Neptune -->
+          <path class="zone" data-planet="neptune" d="M80 400 C76 406 70 414 72 422 L92 422 C93 414 91 406 90 400Z"/>
+          <path class="zone" data-planet="neptune" transform="translate(200 0) scale(-1 1)" d="M80 400 C76 406 70 414 72 422 L92 422 C93 414 91 406 90 400Z"/>
+        </g>
+        <!-- outline on top: thin croquis-style line -->
+        <g stroke="rgba(255,255,255,.6)" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
+          <ellipse cx="100" cy="32" rx="17" ry="22"/>
+          <use href="#bodyLine"/>
+          <use href="#bodyLine" transform="translate(200 0) scale(-1 1)"/>
+        </g>
       </svg>
-      <p class="bodymap-figure-caption">A schematic placeholder — swap for real illustration later</p>
     </div>
   </div>
   <div class="bodymap-steps" id="bodymapSteps"></div>

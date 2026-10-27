@@ -108,4 +108,30 @@ transitRisingBtn.addEventListener('click', () => {
   );
 });
 
-renderBaseSnapshot();
+
+/* ══ TODAY'S READ — a plain-language summary under the transit cards.
+   Rule-based (no API): the Sun's sign sets the season's theme, the Moon's
+   sign (it changes about every 2 days) sets today's do/don't/mantra. ══ */
+const MOON_TODAY = {"aries": ["Starting things, moving your body, and bold first steps.", "Take the first step on one thing you have been circling.", "Pick a fight or send the heated message.", "I move, and clarity follows."], "taurus": ["Slow, steady work, good food, and money basics.", "Do one thing well and enjoy it.", "Rush, or make an impulsive purchase.", "Slow is how I build."], "gemini": ["Conversations, writing, errands, and learning.", "Reach out, ask questions, finish the message you have been avoiding.", "Scatter yourself across ten tabs.", "My curiosity is my compass."], "cancer": ["Home, family, comfort, and emotional honesty.", "Cook, tidy your space, check in on someone.", "Absorb everyone else's mood.", "I can care without carrying it all."], "leo": ["Creativity, play, and being seen.", "Make something and show it.", "Fish for applause or take things personally.", "I shine without dimming anyone else."], "virgo": ["Organizing, health routines, and details.", "Clear the backlog and fix the small stuff.", "Nitpick yourself or others.", "Progress over perfect."], "libra": ["Partnerships, beauty, and fair conversations.", "Collaborate and make plans with people you like.", "Say yes just to keep the peace.", "I choose balance, not appeasement."], "scorpio": ["Deep work, honest conversations, and letting go.", "Say the true thing, finish the research, release something.", "Test people or hold a grudge.", "What I release makes room."], "sagittarius": ["Big ideas, learning, travel, and optimism.", "Plan the trip, start the course, think bigger.", "Overpromise or skip the details.", "I trust where I am heading."], "capricorn": ["Goals, structure, and focused work.", "Set one concrete target and take the first step.", "Work straight through your own exhaustion.", "Steady steps get me there."], "aquarius": ["Community, new ideas, and doing things your own way.", "Connect with friends and try something unconventional.", "Detach from people to avoid feeling.", "I belong to myself and to my people."], "pisces": ["Rest, creativity, intuition, and compassion.", "Make art, rest, and follow a hunch.", "Escape into numbness, or sign anything while foggy.", "I listen before I act."]};
+const SUN_SEASON = {"aries": "fresh starts and bold energy", "taurus": "grounding, pleasure, and building things that last", "gemini": "curiosity, conversation, and many ideas", "cancer": "home, family, and feelings", "leo": "self-expression, play, and being seen", "virgo": "routines, health, and details", "libra": "relationships, beauty, and balance", "scorpio": "depth, intensity, and transformation", "sagittarius": "big ideas, travel, and optimism", "capricorn": "ambition, structure, and long-term goals", "aquarius": "community, innovation, and the future", "pisces": "intuition, rest, and compassion"};
+function renderToday(h){
+  const el = document.getElementById('todayCard'); if(!el) return;
+  const sun = h.CelestialBodies.sun.Sign.key, moon = h.CelestialBodies.moon.Sign.key;
+  const m = MOON_TODAY[moon], cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const sw = ASTRO_COLORS.swatch(ASTRO_COLORS.SIGN_COLORS[moon]);
+  el.style.setProperty('--c', sw.hex);
+  const retro = h.CelestialBodies.mercury.isRetrograde
+    ? '<p class="today-retro"><span aria-hidden="true">℞</span> Mercury is retrograde: re-read before you send, and back things up.</p>' : '';
+  el.innerHTML = `
+    <p class="today-eyebrow">Today's read</p>
+    <p class="today-summary">Sun in ${cap(sun)} is about ${SUN_SEASON[sun]}. With the Moon in ${cap(moon)}, today is good for <strong>${m[0].charAt(0).toLowerCase() + m[0].slice(1)}</strong></p>
+    <div class="today-cols">
+      <div class="today-do"><span class="today-icon" aria-hidden="true">✓</span><div><span class="today-tag">Do</span><p>${m[1]}</p></div></div>
+      <div class="today-dont"><span class="today-icon" aria-hidden="true">✕</span><div><span class="today-tag">Don't</span><p>${m[2]}</p></div></div>
+    </div>
+    ${retro}
+    <p class="today-mantra"><span>Mantra</span>“${m[3]}”</p>`;
+  el.hidden = false;
+}
+
+renderToday(renderBaseSnapshot());

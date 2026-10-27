@@ -26,6 +26,22 @@
 .transit-title{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(28px,4vw,40px);line-height:1;color:var(--white);margin-bottom:16px}
 .transit-title em{font-style:italic;font-weight:400}
 .transit-sub{font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;opacity:.88;margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto}
+.today-card{max-width:680px;margin:44px auto 0;padding:36px 8px 0;text-align:center;border-top:1px solid rgba(255,255,255,.15)}
+.today-card[hidden]{display:none}
+.today-eyebrow{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--c,#fff);margin-bottom:16px}
+.today-summary{font-family:'Playfair Display',serif;font-size:clamp(20px,2.8vw,27px);font-weight:500;line-height:1.5;color:var(--white);margin-bottom:30px}
+.today-summary strong{font-weight:500;font-style:italic;background:linear-gradient(transparent 62%,color-mix(in srgb,var(--c,#fff) 55%,transparent) 62%)}
+.today-cols{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:30px;text-align:left}
+.today-do,.today-dont{display:flex;gap:14px;align-items:flex-start;padding:4px 26px;font-family:'Space Mono',monospace;font-size:13.5px;line-height:1.65;color:var(--white)}
+.today-do{border-right:1px solid rgba(255,255,255,.18)}
+.today-do p,.today-dont p{margin:0}
+.today-icon{flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#111}
+.today-do .today-icon{background:#5EEAD4}.today-dont .today-icon{background:#FF6B6B}
+.today-tag{display:block;font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:3px}
+.today-retro{display:inline-block;font-family:'Space Mono',monospace;font-size:12px;margin:0 0 26px;padding:8px 16px;border:1.5px dashed rgba(255,255,255,.55);border-radius:999px;color:var(--white)}
+.today-mantra{margin:0;font-family:'Short Stack',cursive;font-size:clamp(24px,3.4vw,32px);line-height:1.35;color:var(--white)}
+.today-mantra span{display:block;font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--c,#fff);margin-bottom:8px}
+@media(max-width:600px){.today-cols{grid-template-columns:1fr;gap:18px}.today-do{border-right:0;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:18px}.today-do,.today-dont{padding:4px 6px}}
 .transit-rising-row{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:10px}
 .btn-transit-rising{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   padding:11px 22px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:var(--white);border-radius:999px;cursor:pointer;transition:background .2s}
@@ -63,7 +79,7 @@
   <img class="scrap-photo" src="images/polaroid-1.jpg" alt="" loading="eager" style="width:130px;top:14%;left:18%;transform:rotate(-8deg)">
   <div class="scrap" style="width:100px;height:130px;top:58%;left:12%;transform:rotate(6deg)">[tarot card]</div>
   <div class="scrap" style="width:120px;height:80px;top:20%;right:9%;transform:rotate(9deg)">[ticket stub]</div>
-  <div class="scrap" style="width:90px;height:90px;border-radius:50%;bottom:12%;right:14%;transform:rotate(-4deg)">[crystal photo]</div>
+  <img class="scrap-photo" src="images/wheel-scrap.png" alt="" loading="eager" style="width:100px;bottom:9%;right:15%;transform:rotate(8deg)">
   <div class="scrap" style="width:110px;height:70px;bottom:8%;left:32%;transform:rotate(3deg)">[dried flower]</div>
   <div class="scrap-label" style="top:10%;left:40%;transform:rotate(-3deg)">est. 2026</div>
 
@@ -87,21 +103,12 @@
     <h2 class="transit-title">Current <em>Transits</em></h2>
     <p class="transit-sub" id="transitSub">Loading today's sky…</p>
     <div class="highlight-grid" id="transitGrid"></div>
+    <div class="today-card" id="todayCard" hidden></div>
     <div class="transit-rising-row">
       <button type="button" class="btn-transit-rising" id="transitRisingBtn">See your Rising sign too</button>
       <p class="transit-rising-note" id="transitRisingNote">Sun, Moon, and planet signs only need today's date — Rising needs your location too, and only your browser sees it.</p>
     </div>
   </div>
-</section>
-
-<!-- FEATURE CALLOUT — the humor calculator, linked from the homepage
-     itself (not just the nav), so there's something to click into
-     while the essays below are still being written. -->
-<section class="feature-tool" aria-label="Try the humor calculator">
-  <p class="mission-eyebrow">While the archive fills in</p>
-  <h2 class="transit-title">How funny <em>are</em> you?</h2>
-  <p class="transit-sub">Mercury, Venus, your 5th house, and a few key aspects to Uranus and Jupiter, read together as a comedic style and a score.</p>
-  <a class="btn-transit-rising" href="humor.html">Calculate my humor →</a>
 </section>
 
 <!-- FILTERS + ARCHIVE GRID (auto-generated from posts.js) — hidden
@@ -165,7 +172,7 @@ function renderGrid(){
     // staggered per-row cascade as each row scrolls into view, not just a flat fade
     const delay = (i % 3) * 0.09;
     return `
-    <a class="card reveal${p.published === false ? ' card-coming-soon' : ''}" href="post.html?id=${p.id}" style="transition-delay:${delay}s">
+    <a class="card reveal${p.published === false ? ' card-coming-soon' : ''}" href="${p.href || 'post.html?id=' + p.id}" style="transition-delay:${delay}s">
       ${p.published === false ? '<span class="coming-soon-tag">Coming Soon</span>' : ''}
       <span class="card-tag" style="background:${sw.cssVar};color:${sw.text}">${p.category}</span>
       <div class="card-title">${p.title}</div>

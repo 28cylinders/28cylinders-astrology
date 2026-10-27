@@ -9,11 +9,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500&family=Short+Stack&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-.post-wrap{max-width:680px;margin:0 auto;padding:120px 32px 140px}
+.post-wrap{max-width:760px;margin:0 auto;padding:120px 32px 140px}
 .post-tag{display:inline-block;font-family:'Space Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:20px}
 .post-title{font-family:'Playfair Display',serif;font-size:clamp(30px,5vw,48px);font-weight:600;line-height:1.1;margin-bottom:14px}
 .post-date{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.4;margin-bottom:40px}
-.post-body{font-family:'Space Mono',monospace;font-size:15px;line-height:1.85;opacity:.8}
+.post-body{font-family:'Space Mono',monospace;font-size:15px;line-height:1.85;opacity:.92}
+.post-body p{margin-bottom:1.3em}
+.post-body h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;margin:1.6em 0 .6em}
+.chart-fig{margin:8px 0 34px}.chart-fig figcaption{text-align:center;font-size:12px;margin-top:10px;opacity:.85}
+.mcic-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0 30px}
+.pair-card{background:var(--white);color:var(--ink-1);border-radius:3px;padding:20px 22px;box-shadow:0 8px 22px rgba(0,0,0,.35);font-size:13.5px;line-height:1.7}
+.pair-card h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin-bottom:8px;color:var(--ink-1)}
+.pair-card p{margin:0}.pair-mc{border-top:6px solid var(--amber)}.pair-ic{border-top:6px solid var(--violet)}
+@media(max-width:700px){.mcic-pair{grid-template-columns:1fr}}
+.tbl-wrap{overflow-x:auto;margin:6px 0 26px}
+.post-table{width:100%;border-collapse:collapse;background:var(--white);color:var(--ink-1);font-size:13px;line-height:1.55;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.post-table th{background:#111;color:#fff;text-align:left;padding:12px 16px;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.post-table td{padding:12px 16px;border-top:1px solid #ddd;vertical-align:top}
+.post-table td:first-child{font-weight:700;width:38%;border-left:6px solid var(--amber)}
+.post-table tr:nth-child(even) td:first-child{border-left-color:var(--violet)}
+.next-box{border:2px dashed rgba(255,255,255,.5);padding:16px 20px;border-radius:4px;font-size:13.5px;line-height:1.7;margin-bottom:26px}
 .post-back{display:inline-block;margin-top:56px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--white);opacity:.5;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.3)}
 .post-back:hover{opacity:1}
 </style>
@@ -42,11 +57,18 @@ if(post){
     <h1 class="post-title">${post.title}</h1>
     <p class="post-date">${new Date(post.date+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</p>
     <div class="post-body">
-      <p>${post.body || post.excerpt}</p>
+      ${(post.body || post.excerpt).split('\n\n').map(t => (t.trim() === '[[widget]]' ? '<div id="mcicMount" class="mcic-embed"></div>' : /^<(h2|figure|div)/.test(t.trim()) ? t.trim() : `<p>${t.trim()}</p>`)).join('')}
       ${post.body ? '' : '<p style="margin-top:20px;opacity:.5">— full essay not written yet, this is the excerpt placeholder —</p>'}
     </div>
     <a class="post-back" href="index.html">← Back to the archive</a>
   `;
+  // interactive embeds: load their CSS + scripts only on the post that uses them
+  if(post.widget === 'mc-ic' && document.getElementById('mcicMount')){
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'mcic.css'; document.head.appendChild(l);
+    ['vendor/circular-natal-horoscope.bundle.js', 'mcic.js'].reduce((p, src) => p.then(() => new Promise(res => {
+      const s = document.createElement('script'); s.src = src; s.onload = res; document.body.appendChild(s);
+    })), Promise.resolve()).then(() => { if(location.hash === '#balance') document.getElementById('balance').scrollIntoView(); });
+  }
 } else {
   wrap.innerHTML = `<p style="font-family:'Space Mono',monospace;opacity:.5">Post not found. <a class="post-back" href="index.html">← Back to the archive</a></p>`;
 }

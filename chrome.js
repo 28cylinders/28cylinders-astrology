@@ -14,7 +14,6 @@ document.getElementById('site-nav').innerHTML = `
     <ul class="nav-links" role="list">
       <li><a href="index.html">The Archive</a></li>
       <li><a href="chart.html">Read My Chart</a></li>
-      <li><a href="humor.html">How Funny Am I?</a></li>
       <li><a href="https://28cylinders.com" target="_blank" rel="noopener">28 Cylinders ↗</a></li>
       <li><a href="mailto:hi@28cylinders.com">Contact</a></li>
     </ul>
@@ -25,7 +24,6 @@ document.getElementById('site-nav').innerHTML = `
   <div class="nav-drawer" id="drawer" role="dialog" aria-label="Mobile menu">
     <a href="index.html">The Archive</a>
     <a href="chart.html">Read My Chart</a>
-    <a href="humor.html">How Funny Am I?</a>
     <a href="https://28cylinders.com">28 Cylinders</a>
     <a href="mailto:hi@28cylinders.com">Contact</a>
   </div>

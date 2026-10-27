@@ -69,7 +69,7 @@ const HOUSE_COLOR_KEYS = [
 const CATEGORY_COLORS = {
   'Venus': 'pink', 'Moon': 'lavender', 'Mercury': 'sky', 'Rising': 'fuchsia',
   'Houses': 'purple', 'Transits': 'orange', 'Compatibility': 'teal', 'Birth Chart': 'yellow',
-  'Nodes': 'violet',
+  'Nodes': 'violet', 'Career': 'amber', 'Self': 'coral', 'Humor': 'yellow',
 };
 
 // the humor calculator's 8 comedy-style buckets (see humor.js) — colors
@@ -87,4 +87,12 @@ const COMEDY_STYLE_COLORS = {
   charmingTease: 'pink',      // Libra/Taurus — Venus-ruled
 };
 
-window.ASTRO_COLORS = { PALETTE, swatch, contrastRatio, textOn, PLANET_COLORS, HOUSE_COLOR_KEYS, CATEGORY_COLORS, COMEDY_STYLE_COLORS };
+// one fixed color per zodiac sign, reused everywhere a sign appears
+// (MC/IC scale, wheel, pickers) so a sign always reads as the same hue.
+const SIGN_COLORS = {
+  aries: 'yellow', taurus: 'teal', gemini: 'sky', cancer: 'lavender',
+  leo: 'orange', virgo: 'lime', libra: 'pink', scorpio: 'purple',
+  sagittarius: 'coral', capricorn: 'cobalt', aquarius: 'mint', pisces: 'fuchsia',
+};
+
+window.ASTRO_COLORS = { SIGN_COLORS, PALETTE, swatch, contrastRatio, textOn, PLANET_COLORS, HOUSE_COLOR_KEYS, CATEGORY_COLORS, COMEDY_STYLE_COLORS };
